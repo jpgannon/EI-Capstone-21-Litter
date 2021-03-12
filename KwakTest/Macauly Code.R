@@ -27,8 +27,6 @@ lat_long <- lat_long%>%mutate(popup_info = paste("Stand:",Site))
 colors <- c("green", "blue")
 pal <- colorFactor(colors, lat_long$Site)
 
-
-
 ui <- dashboardPage(
     skin = "red",
     dashboardHeader(title = "Dashboard"),
@@ -36,8 +34,14 @@ ui <- dashboardPage(
         menuItem("Home Page", tabName = "Home_Page", icon = icon("home")),
         menuItem("Map", tabName = "Map", icon = icon("globe")),
         menuItem("Litterfall", tabName = "Litterfall", icon = icon("leaf")),
-        menuItem("Soil Respiration", tabName = "Soil_Respiration", icon = icon("tint")),
-        menuItem("Explore Soil Respiration Data", tabName = "SoilRespiration_Data", icon = icon("tint"))
+        menuItem("Soil Respiration", icon = icon("tint"), startExpanded = TRUE,
+                  menuSubItem("Soil Respiration Charts",
+                              tabName = "Soil_Respiration",
+                              icon = icon("tint")),
+                  menuSubItem("Soil Respiration Data",
+                              tabName = "SoilRespiration_Data",
+                              icon = icon("tint")))
+        
     )),
     dashboardBody(tabItems(
         tabItem(tabName = "Home_Page",
