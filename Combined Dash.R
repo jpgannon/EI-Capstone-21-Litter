@@ -30,8 +30,6 @@ LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment,
 
 lat_long <- lat_long%>% mutate(popup_info = paste("Stand:",Site))
 
-
-
 colors <- c("green", "blue")
 pal <- colorFactor(colors, lat_long$Site)
 
