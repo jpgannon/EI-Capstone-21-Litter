@@ -22,8 +22,12 @@ SoilRespiration <-
 StandLocations <-
   read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/StandLocations.csv")
 lat_long <-
-  read.csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/lat_long.csv")
+  read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/lat_long.csv")
 
 #Filter soil resp data and converted to correct date format 
 CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, treatment) %>%
   mutate(date = mdy(date))
+#Adding treatment to litterfall data
+Litterfall <- Litterfall%>%mutate(Treatment = paste(Treatment))
+
+lat_long <- lat_long%>% mutate(popup_info = paste("Stand:",Site))
