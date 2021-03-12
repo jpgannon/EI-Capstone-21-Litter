@@ -24,7 +24,12 @@ lat_long <-
 CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, treatment) %>%
     mutate(date = mdy(date))
 
+Litterfall <- Litterfall%>%mutate(Treatment = paste(Treatment))
+LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment, whole.mass) %>%
+  rename("Mass" = 7)
+
 lat_long <- lat_long%>% mutate(popup_info = paste("Stand:",Site))
+
 
 
 colors <- c("green", "blue")
@@ -38,8 +43,20 @@ ui <- dashboardPage(
     dashboardSidebar(sidebarMenu(
         menuItem("Home Page", tabName = "Home_Page", icon = icon("home")),
         menuItem("Map", tabName = "Map", icon = icon("globe")),
-        menuItem("Litterfall", tabName = "Litterfall", icon = icon("leaf")),
-        menuItem("Soil Respiration", tabName = "Soil_Respiration", icon = icon("tint"))
+        menuItem("Litterfall", icon = icon("globe"), startExpanded = TRUE,
+                 menuSubItem("Litterfall Charts",
+                             tabName = "Litterfall",
+                             icon = icon("bar-chart-o")),
+                 menuSubItem("Litterfall Data",
+                             tabName = "Litterfall_Data",
+                             icon = icon("book"))),
+        menuItem("Soil Respiration", icon = icon("tint"), startExpanded = TRUE,
+                 menuSubItem("Soil Respiration Charts",
+                             tabName = "Soil_Respiration",
+                             icon = icon("bar-chart-o")),
+                 menuSubItem("Soil Respiration Data",
+                             tabName = "SoilRespiration_Data",
+                             icon = icon("book")))
     )),
     dashboardBody(tabItems(
         tabItem(tabName = "Home_Page",
@@ -71,7 +88,34 @@ ui <- dashboardPage(
                 fluidRow(box(width = 12, leafletOutput("StandMap")))),
         #Name and layout of Litterfall tab
         tabItem(tabName = "Litterfall",
-                h1("Litterfall")),
+                h1("Litterfall"),
+                #Input for Year 
+                box(width = 3, sliderInput("Year", label = em("Date Range:",
+                                                              style = "text-align:center;color black;font-size:100%"),
+                                           min = min(Litterfall$Year),
+                                           max = max(Litterfall$Year),
+                                           value = c(min(Litterfall$Year), max(Litterfall$Year)),
+                                           sep = "",
+                                           step = 1)),
+                #Input for Treatment
+                box(width = 3, selectInput("Treatment", label = em("Select Treatment:",
+                                                                   style = "text-align:center;color black;font-size:100%"),
+                                           unique(Litterfall$Treatment), multiple = TRUE, selected = c("N", "P", "NP", "Ca", "C"))),
+                #Input for Stand
+                box(width = 3, selectizeInput("Stand", label = em("Select Stand:",
+                                                                  style = "text-align:center;color black;font-size:100%"),
+                                              choices = unique(Litterfall$Stand), multiple = TRUE, selected = "C1")),
+                
+                #Input Time Series
+                box(plotOutput("timeseries_plot"), width = 12),
+                #Input Box Plot
+                box(plotOutput("litterfall_box"), width = 12)),
+        
+        #Input Data Table
+        tabItem(tabName = "Litterfall_Data",
+                h1("Litterfall Data"),
+                DT:: dataTableOutput("litterfalltable"),
+        ),
         #Name and layout of soil respiration tab
         tabItem(tabName = "Soil_Respiration",
                 h1("Soil Respiration"),
@@ -181,6 +225,58 @@ server <- function(input, output) {
     output$soilresptable = DT::renderDataTable({
         SoilRespiration
     })
+    
+    #Litterfall time series plot
+    output$timeseries_plot <- renderPlot({
+      min <- input$Year[1]
+      max <- input$Year[2]
+      Treatmentselection <- input$Treatment
+      Standselection <- input$Stand
+      
+      
+      Litterfall %>%
+        filter(Year >= min & Year <= max) %>%
+        filter(Stand %in% Standselection & Treatment %in% Treatmentselection) %>%
+        mutate(Year = as.factor(Year)) %>%
+        ggplot(aes(x = Year, y = whole.mass)) +
+        geom_boxplot(aes(x = Year, y = whole.mass, color = Treatment), position = position_dodge(0.8), lwd = 1)+
+        geom_dotplot(aes(x = Year, y = whole.mass, color = Treatment), position = position_dodge(0.8), 
+                     binaxis = "y", binwidth = 3)+
+        theme_bw() +
+        theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+        labs(title ="Time Series: Litterfall Mass vs. Time",
+             x = "Year",
+             y = "Mass (g litter /m2)") +
+        facet_wrap(facets = "Stand", ncol = 4)
+    })
+    
+    #Litterfall boxplot output
+    output$litterfall_box <- renderPlot({
+      min <- input$Year[1]
+      max <- input$Year[2]
+      Treatmentselection <- input$Treatment
+      Standselection <- input$Stand
+      
+      Litterfall %>%
+        filter(Year >= min & Year <= max) %>%
+        filter(Stand %in% Standselection & Treatment %in% Treatmentselection) %>%
+        ggplot(aes(x=Treatment, y=whole.mass, fill = Treatment)) +
+        geom_boxplot(outlier.colour = "red", outlier.shape = 4,
+                     outlier.size = 5, lwd = 1)+
+        geom_line()+
+        theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+        theme_bw() +
+        labs(title ="Boxplot: Litterfall Mass vs. Treatment Type",
+             x = "Treatment",
+             y = "Mass (g litter /m2)") +
+        facet_wrap(facets = "Stand", ncol = 4)
+      
+    })
+    #Litterfall data table output
+    output$litterfalltable = DT::renderDataTable(
+      LitterTable, options = list(pageLength = 20)
+      
+    )
 }
 
 
