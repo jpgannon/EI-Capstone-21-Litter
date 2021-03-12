@@ -72,8 +72,7 @@ ui <- dashboardPage(
                                        selectize = TRUE, multiple = TRUE, selected =c("N", "P")),
             ),
             #New Map Code
-            fluidRow(box(width = 12, leafletOutput("StandMap"),
-                         actionButton("Stands", "Stands")))),
+            fluidRow(box(width = 12, leafletOutput("StandMap")))),
     #Name and layout of Litterfall tab
     tabItem(tabName = "Litterfall",
             h1("Litterfall")),
