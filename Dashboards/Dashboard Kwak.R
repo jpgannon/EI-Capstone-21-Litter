@@ -13,7 +13,7 @@ library(readr)
 
 #library(sf)
 #library(tigris)
-
+#
 
 Litterfall <-
   read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/Litterfall.csv")
