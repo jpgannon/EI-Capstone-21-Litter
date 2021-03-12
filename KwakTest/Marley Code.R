@@ -14,6 +14,7 @@ Litterfall <-
     read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/Litterfall.csv") %>%
     mutate(Treatment = paste(Treatment))
 
+Litterfall <- Litterfall%>%mutate(Treatment = paste(Treatment))
 LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment, whole.mass) %>%
     rename("Mass" = 7)
 
