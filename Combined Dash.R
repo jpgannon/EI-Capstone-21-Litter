@@ -12,13 +12,13 @@ library(ggthemes)
 library(readr)
 
 Litterfall <-
-    read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/Litterfall.csv")
+  read_csv("Data/Litterfall.csv")
 SoilRespiration <-
-    read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/SoilResp.csv")
+  read_csv("Data/SoilResp.csv")
 StandLocations <-
-    read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/StandLocations.csv")
+  read_csv("Data/StandLocations.csv")
 lat_long <-
-    read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/lat_long.csv")
+  read_csv("Data/lat_long.csv")
 
 #Filter soil resp data and converted to correct date format 
 CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, treatment) %>%

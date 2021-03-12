@@ -10,23 +10,17 @@ library(DT)
 
 
 Litterfall <-
-    read.csv("~/SENIOR_YEAR/2021_SPRING/Capstone/EI-Capstone-21-Litter/Data/Litterfall.csv")
+  read.csv("Data/Litterfall.csv")
 SoilRespiration <-
-    read.csv("~/SENIOR_YEAR/2021_SPRING/Capstone/EI-Capstone-21-Litter/Data/SoilResp.csv")
+  read.csv("Data/SoilResp.csv")
 StandLocations <-
-    read.csv("~/SENIOR_YEAR/2021_SPRING/Capstone/EI-Capstone-21-Litter/Data/StandLocations.csv")
+  read.csv("Data/StandLocations.csv")
 lat_long <-
-    read.csv("~/SENIOR_YEAR/2021_SPRING/Capstone/EI-Capstone-21-Litter/Data/lat_long.csv")
+  read.csv("Data/lat_long.csv")
 
 #Filter soil resp data and converted to correct date format 
 CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, treatment) %>%
     mutate(date = mdy(date))
-
-
-#CleanLit <- select()
-
-#FixedLocations <-
-
 
 
 ui <- dashboardPage(

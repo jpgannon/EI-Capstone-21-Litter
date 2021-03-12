@@ -10,11 +10,17 @@ library(tidyverse)
 library(ggthemes)
 
 Litterfall <-
-    read_csv("C:/Users/marle/Desktop/EI Capstone/EI_Capstone_S21/Litter_and_Respiration/Litterfall.csv")
+  read_csv("Data/Litterfall.csv")
+SoilRespiration <-
+  read_csv("Data/SoilResp.csv")
+StandLocations <-
+  read_csv("Data/StandLocations.csv")
+lat_long <-
+  read_csv("Data/lat_long.csv")
 
 
-    LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment, whole.mass) %>%
-      rename("Mass" = 7)
+LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment, whole.mass) %>%
+  rename("Mass" = 7)
   
 
 ui <- dashboardPage(
