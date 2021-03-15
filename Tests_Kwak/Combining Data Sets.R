@@ -1,19 +1,6 @@
-library(shiny)
-library(shinydashboard)
-library(leaflet)
-library(dplyr)
-library(rgdal)
 library(tidyr)
-library(ggplot2)
-library(lubridate)
-library(DT)
+library(dplyr)
 library(tidyverse)
-library(ggthemes)
-library(readr)
-
-#library(sf)
-#library(tigris)
-
 
 Litterfall <-
   read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/Litterfall.csv")
@@ -29,10 +16,12 @@ LitterBasket_Coord <-
   read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/LitterBasket_Coord.csv")
 
 
-#Filter soil resp data and converted to correct date format 
-CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, treatment) %>%
-  mutate(date = mdy(date))
-#Adding treatment to litterfall data
-Litterfall <- Litterfall%>%mutate(Treatment = paste(Treatment))
+LitterBasketLoc <- select(LitterBasket_Coord, stand, basket, stake1_utm_x, stake1_utm_y)
 
-lat_long <- lat_long%>% mutate(popup_info = paste("Stand:",Site))
+LitterfallLocFilt <- Litterfall %>%
+                      select(Stand, Basket, Plot, Treatment, whole.mass) %>%
+                      filter(Stand == c("C7", "JBO"))
+
+CombinedLitLoc <- merge(LitterBasketLoc, LitterfallLocFilt)
+  
+#SoilRespLoc <- 
