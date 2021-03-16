@@ -1,5 +1,6 @@
 library(shiny)
 library(shinydashboard)
+library(shinyWidgets)
 library(leaflet)
 library(dplyr)
 library(rgdal)
@@ -11,20 +12,13 @@ library(DT)
 library(plotly)
 library(RColorBrewer)
 
-Litterfall <- 
-  read_csv("Data/Litterfall.csv")
-SoilRespiration <-
-  read_csv("Data/SoilResp.csv")
-StandLocations <-
-  read_csv("Data/StandLocations.csv")
-lat_long <-
-  read_csv("Data/lat_long.csv")
-
+Litterfall <- read_csv("Data/Litterfall.csv")
 
 
 LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment, whole.mass) %>%
   rename("Mass" = 7)
 
+Species <- c("ASH", "BASP", "BASS", "BE", "HB", "OAK", "PC", "RM", "SM", "STM", "WB","YB", "QASP", "GB", "MM", "RO", "SEEDS", "TWIGS", "ASP", "VIB", "UNK", "NL")
 ui <- dashboardPage(
   skin = "red",
   dashboardHeader(title = "Dashboard"),
@@ -34,13 +28,15 @@ ui <- dashboardPage(
     menuItem("Litterfall Data Table", tabName = "Litterfall_Data", icon = icon("table")),
     menuItem("Litterfall Species", tabName = "Litterfall_Species", icon = icon("book"))
   )),
-  #Tab Names
+#Tab Names
   dashboardBody(tabItems(
+#Input Homepage
     tabItem(tabName = "Home_Page",
             h1("Home Page, desciption of app and how to use will be placed here")),
+#Input Litterfall timeseries
     tabItem(tabName = "Litterfall",
-            h1("Litterfall"),
-            #Input for Year 
+            h1("Litterfall Time Series Plots"),
+          #Input for Year 
             box(width = 3, sliderInput("Year", label = em("Date Range:",
                                                           style = "text-align:center;color black;font-size:100%"),
                                        min = min(Litterfall$Year),
@@ -48,11 +44,11 @@ ui <- dashboardPage(
                                        value = c(min(Litterfall$Year), max(Litterfall$Year)),
                                        sep = "",
                                        step = 1)),
-            #Input for Treatment
+          #Input for Treatment
             box(width = 3, selectInput("Treatment", label = em("Select Treatment:",
                                                                style = "text-align:center;color black;font-size:100%"),
                                        unique(Litterfall$Treatment), multiple = TRUE, selected = c("N", "P", "NP", "Ca", "C"))),
-            #Input for Stand
+           #Input for Stand
             box(width = 3, selectizeInput("Stand", label = em("Select Stand:",
                                                               style = "text-align:center;color black;font-size:100%"),
                                           choices = unique(Litterfall$Stand), multiple = TRUE, selected = "C1")),
@@ -60,35 +56,64 @@ ui <- dashboardPage(
             box(width = 3, selectizeInput("Plot", label = em("Select Plot:",
                                                               style = "text-align:center;color black;font-size:100%"),
                                           choices = unique(Litterfall$Plot), multiple = TRUE, selected = c("1", "2", "3", "4", "5", "7"))),
-            #Input Time Series
-            box(plotOutput("timeseries_plot"), width = 10),
-            #Input Box Plot
-            box(plotlyOutput("litterfall_box"), width = 10)),
+           #Input Time Series Plot
+            box(plotOutput("timeseries_plot"), width = 12),
+           #Input Box Plot
+            box(plotlyOutput("litterfall_box"), width = 12)),
     
-    #Input Species Visualization
+#Input Species Visualization
     tabItem(tabName = "Litterfall_Species",
             h1("Litterfall Data: Species Visualization"),
-            box(width = 3, sliderInput("Species_Year", label = em("Date Range:",
+          #Input Year
+            box(width = 4, sliderInput("Species_Year", label = em("Date Range:",
                                                           style = "text-align:center;color black;font-size:100%"),
                                        min = min(Litterfall$Year),
                                        max = max(Litterfall$Year),
                                        value = c(min(Litterfall$Year), max(Litterfall$Year)),
                                        sep = "",
                                        step = 1)),
-            #Input for Treatment
-            box(width = 3, selectInput("Species_Treatment", label = em("Select Treatment:",
+           #Input for Treatment
+            box(width = 4, selectInput("Species_Treatment", label = em("Select Treatment:",
                                                                style = "text-align:center;color black;font-size:100%"),
                                        choices = unique(Litterfall$Treatment), multiple = TRUE, selected = c("N", "P", "NP", "Ca", "C"))),
             
-            #Input for Species
-            box(width = 3, selectInput("Species", label = em("Select Species:",
+          #Input for Species
+            box(width = 4, selectInput("Species", label = em("Select Species:",
                                                                style = "text-align:center;color black;font-size:100%"),
-                                        choices = c("ASH", "BASP", "BASS", "BE", "HB", "OAK"), multiple = FALSE, selected = "ASH")),
-            box(plotOutput("litter_species_plot"), width = 12)),
+                                        choices = c("ASH", "BASP", "BASS", "BE", "HB", "OAK", "PC", "RM", "SM",
+                                                    "STM", "WB","YB", "QASP", "GB", "MM", "RO", "SEEDS",
+                                                    "TWIGS", "ASP", "VIB", "UNK", "NL"), multiple = FALSE, selected = "ASH")),
+          #Input Boxplot
+            box(plotlyOutput("litter_species_boxplot"), width = 12),
+          
+          #Input Species Key
+box(width = 12, helpText("Species Key:
+                                    ASH: White Ash,
+                                    BASP: Bigtooth Aspen,
+                                    BASS: Basswood,
+                                    BE: American Beech,
+                                    HB: Hobblebush,
+                                    OAK: Northern Red Oak,
+                                    PC: Pin Cherry,
+                                    RM: Red Maple,
+                                    SM: Sugar Maple,
+                                    STM: Striped Maple,
+                                    WB: White Birch,
+                                    YB: Yellow Birch,
+                                    QASP: Quaking Aspen,
+                                    GB: Gray Birch,
+                                    MM: Mountain Maple,
+                                    RO: Northern Red Oak
+                                    SEEDS: Seeds,
+                                    TWIGS: Twigs, 
+                                    ASP: Bigtooth Aspen,
+                                    VIB: Viburnum Lantanoides,
+                                    UNK: Unknown,
+                                    NL: Non Leaf"))),
             
-    #Input Data Table
+#Input Data Table
     tabItem(tabName = "Litterfall_Data",
-            h1("Litterfall Data"),
+            h1("Litterfall Data Table"),
             DT:: dataTableOutput("litterfalltable"))
     
   ))
@@ -98,7 +123,7 @@ ui <- dashboardPage(
 server <- function(input, output) {
   
   
-  #Litterfall time series plot
+#Litterfall time series plot
   output$timeseries_plot <- renderPlot({
     min <- input$Year[1]
     max <- input$Year[2]
@@ -123,7 +148,7 @@ server <- function(input, output) {
       
   })
   
-  #Litterfall boxplot output
+#Litterfall boxplot output
   output$litterfall_box <- renderPlotly({
     min <- input$Year[1]
     max <- input$Year[2]
@@ -147,28 +172,32 @@ server <- function(input, output) {
     
   })
   
-  #Litterfall Species Plot Output
-  outputlitter_species_plot <- renderPlot({
+#Litterfall Species Plot Output
+  output$litter_species_boxplot <- renderPlotly({
     min <- input$Species_Year[1]
     max <- input$Species_Year[2]
     Treatmentselection <- input$Species_Treatment
     Speciesselection <- input$Species
     
-    SpeciesLitter %>%
+    Litterfall %>%
       filter(Year >= min & Year <= max) %>%
       filter(Treatment %in% Treatmentselection & Species %in% Speciesselection) %>%
       mutate(Year = as.factor(Year)) %>%
-      ggplot(aes(x = Year, y = whole.mass)) +
-      theme_bw() +
+      ggplot(aes(x=Treatment, y=whole.mass, fill = Treatment)) +
+      geom_boxplot(outlier.colour = "red", outlier.shape = 4,
+                   outlier.size = 5, lwd = 1)+
+      geom_line()+
       theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-      labs(title ="Time Series Based on Species: Litterfall Mass vs. Time",
-           x = "Year",
-           y = "Mass (g litter /m2)") +
-      facet_wrap(facets = "Treatment", ncol = 4)
-  
+      theme_bw() +
+      scale_fill_brewer(palette = "Set1") +
+      labs(title ="Boxplot: Litterfall Mass vs. Treatment Type",
+           x = "Treatment",
+           y = "Mass (g litter /m2)")
+
     
   })
-  #Litterfall data table output
+  
+#Litterfall data table output
   output$litterfalltable = DT::renderDataTable(
     LitterTable, options = list(pageLength = 20)
     
