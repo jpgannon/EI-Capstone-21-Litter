@@ -11,6 +11,7 @@ library(tidyverse)
 library(ggthemes)
 library(readr)
 
+#Read in data
 Litterfall <-
   read_csv("Data/Litterfall.csv")
 SoilRespiration <-
@@ -24,14 +25,15 @@ lat_long <-
 CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, treatment) %>%
     mutate(date = mdy(date))
 
+#Clean up Litterfall Data and create LitterTable
 Litterfall <- Litterfall%>%mutate(Treatment = paste(Treatment))
 LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment, whole.mass) %>%
   rename("Mass" = 7)
 
+#create pop up info when clicking on stands in interactive map
 lat_long <- lat_long%>% mutate(popup_info = paste("Stand:",Site))
 
-
-
+#Create color palet used for interactive map
 colors <- c("green", "blue")
 pal <- colorFactor(colors, lat_long$Site)
 
@@ -59,19 +61,21 @@ ui <- dashboardPage(
                              icon = icon("book")))
     )),
     dashboardBody(tabItems(
+        #Creates homepage tab
         tabItem(tabName = "Home_Page",
                 h1("Home Page, desciption of app and
                how to use will be placed here")),
-        tabItem(tabName = "Map",
+        #Creates interactive map tab with basic functions
+        tabItem(tabName = "Interactive Map",
                 h1("Interactive map of tree stands under study"),
-                #User input for date range
+                #User input for date range on map
                 box(width = 12, dateRangeInput("MapDate", "Date Range:",
                                                start = "2008-07-01",
                                                end = "2020-07-25",
                                                min = "2008-07-01",
                                                max = "2020-07-25"),
                 ),
-                #User input for stand type 
+                #User input for stand type on map
                 box(width = 6, selectInput("Site", "Select Stand :",
                                            c("HBO", "HBM", "JBO", "C9", "C6",
                                              "HB", "JB", "C1", "C2", "C3",   
@@ -79,13 +83,14 @@ ui <- dashboardPage(
                                              "JBM", "HBCa"),
                                            selectize = TRUE, multiple = TRUE, selected = "HBO"),
                 ),
-                #User input for treatment type             
+                #User input for treatment type on map            
                 box(width = 6, selectInput("MapTreatment", "Select Treatment:",
                                            c("P", "N", "NP", "C", "Ca"),
                                            selectize = TRUE, multiple = TRUE, selected =c("N", "P")),
                 ),
-                #New Map Code
+                #Creates map of stands using leaflet
                 fluidRow(box(width = 12, leafletOutput("StandMap")))),
+        
         #Name and layout of Litterfall tab
         tabItem(tabName = "Litterfall",
                 h1("Litterfall"),
@@ -159,11 +164,11 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
-    #Map Server Code
+    #Uses sites from input above to create cirlce markers for each specific Stands on interactive map
     output$StandMap <- renderLeaflet({
-        
+      
         StandSelect <- input$Site
-        
+  
         lat_long <- lat_long %>%
             filter(Site %in% StandSelect)
         
@@ -176,7 +181,7 @@ server <- function(input, output) {
                              popup = ~popup_info,
                              color = ~pal(Site))
     })
-    
+    #Soil Respiration time series GGPlot based on user input
     output$flux_ts_plot <- renderPlot({
         startdate <- input$date[1]
         enddate <- input$date[2]
@@ -200,7 +205,7 @@ server <- function(input, output) {
         
         
     })
-    
+    #Soil respirations Boxplots using GGPlot based on user input
     output$soil_boxplot <- renderPlot({
         startdate <- input$date[1]
         enddate <- input$date[2]
@@ -222,11 +227,12 @@ server <- function(input, output) {
             facet_wrap(facets = "stand", ncol = 4)
     })
     
+    #Data table of soil Respiration 
     output$soilresptable = DT::renderDataTable({
         SoilRespiration
     })
     
-    #Litterfall time series plot
+    #Litterfall time series GGPlot based on user input above
     output$timeseries_plot <- renderPlot({
       min <- input$Year[1]
       max <- input$Year[2]
@@ -250,7 +256,7 @@ server <- function(input, output) {
         facet_wrap(facets = "Stand", ncol = 4)
     })
     
-    #Litterfall boxplot output
+    #Litterfall Boxplots using GGPlot based on user input above
     output$litterfall_box <- renderPlot({
       min <- input$Year[1]
       max <- input$Year[2]
@@ -272,6 +278,7 @@ server <- function(input, output) {
         facet_wrap(facets = "Stand", ncol = 4)
       
     })
+    
     #Litterfall data table output
     output$litterfalltable = DT::renderDataTable(
       LitterTable, options = list(pageLength = 20)

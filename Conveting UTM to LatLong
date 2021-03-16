@@ -1,0 +1,20 @@
+library(tidyverse)
+library(shiny)
+library(rgdal)
+library(dplyr)
+
+#Read in geo coordinate dataset
+geo_dat <- read_csv("Stake_values_fixed_csv.csv")
+
+#Subset data to only include UTM Easting and Northing columns
+sp_dat <- geo_dat[c("UTM EASTIN", "UTM NORTHI")]
+
+#Define UTM positioning
+utm <- SpatialPoints(sp_dat, proj4string=CRS("+proj=utm +zone=19T +datum=WGS84"))
+
+#Transform UTM data to lat/long based on projection info
+lat_long <- spTransform(utm, CRS("+proj=longlat +datum=WGS84"))
+
+lat_long <- as.data.frame(lat_long)
+write_csv(lat_long, "lat_long.csv")
+

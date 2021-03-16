@@ -1,19 +1,7 @@
-library(shiny)
-library(shinydashboard)
-library(leaflet)
-library(dplyr)
-library(rgdal)
-library(tidyr)
-library(ggplot2)
-library(lubridate)
-library(DT)
 library(tidyverse)
-library(ggthemes)
-library(readr)
-
-#library(sf)
-#library(tigris)
-
+library(shiny)
+library(rgdal)
+library(dplyr)
 
 Litterfall <-
   read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/Litterfall.csv")
@@ -29,10 +17,27 @@ LitterBasket_Coord <-
   read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/LitterBasket_Coord.csv")
 
 
-#Filter soil resp data and converted to correct date format 
-CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, treatment) %>%
-  mutate(date = mdy(date))
-#Adding treatment to litterfall data
-Litterfall <- Litterfall%>%mutate(Treatment = paste(Treatment))
+LitterBasketLoc <- select(LitterBasket_Coord, stand, basket, stake1_utm_x, stake1_utm_y)
 
-lat_long <- lat_long%>% mutate(popup_info = paste("Stand:",Site))
+LitterfallLocFilt <- Litterfall %>%
+                      select(Stand, Basket, Plot, Treatment, whole.mass) %>%
+                      filter(Stand == c("C7", "JBO"))
+
+CombinedLitLoc <- merge(LitterBasketLoc, LitterfallLocFilt)
+  
+#SoilRespLoc <- 
+
+#Read in geo coordinate dataset
+geo_dat <- CombinedLitLoc
+
+#Subset data to only include UTM Easting and Northing columns
+sp_dat <- geo_dat[c("stake1_utm_x", "stake1_utm_y")]
+
+#Define UTM positioning
+utm <- SpatialPoints(sp_dat, proj4string=CRS("+proj=utm +zone=19T +datum=WGS84"))
+
+#Transform UTM data to lat/long based on projection info
+CombinedLitLocLatLong <- spTransform(utm, CRS("+proj=longlat +datum=WGS84"))
+
+CombinedLitLocLatLong <- as.data.frame(CombinedLitLocLatLong)
+write_csv(CombinedLitLocLatLong, "CombinedLitLocLatLong.csv")
