@@ -7,9 +7,11 @@ library(tidyr)
 library(ggplot2)
 library(lubridate)
 library(tidyverse)
-library(ggthemes)
+library(DT)
+library(plotly)
+library(RColorBrewer)
 
-Litterfall <-
+Litterfall <- 
   read_csv("Data/Litterfall.csv")
 SoilRespiration <-
   read_csv("Data/SoilResp.csv")
@@ -21,15 +23,15 @@ lat_long <-
 
 LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment, whole.mass) %>%
   rename("Mass" = 7)
-  
 
 ui <- dashboardPage(
   skin = "red",
   dashboardHeader(title = "Dashboard"),
   dashboardSidebar(sidebarMenu(
     menuItem("Home Page", tabName = "Home_Page", icon = icon("home")),
-    menuItem("Litterfall", tabName = "Litterfall", icon = icon("leaf")),
-    menuItem("Litterfall Data", tabName = "Litterfall_Data", icon = icon("table"))
+    menuItem("Litterfall Time Series", tabName = "Litterfall", icon = icon("leaf")),
+    menuItem("Litterfall Data Table", tabName = "Litterfall_Data", icon = icon("table")),
+    menuItem("Litterfall Species", tabName = "Litterfall_Species", icon = icon("book"))
   )),
   #Tab Names
   dashboardBody(tabItems(
@@ -54,18 +56,43 @@ ui <- dashboardPage(
                                                               style = "text-align:center;color black;font-size:100%"),
                                           choices = unique(Litterfall$Stand), multiple = TRUE, selected = "C1")),
             
+            box(width = 3, selectizeInput("Plot", label = em("Select Plot:",
+                                                              style = "text-align:center;color black;font-size:100%"),
+                                          choices = unique(Litterfall$Plot), multiple = TRUE, selected = c("1", "2", "3", "4", "5", "7"))),
             #Input Time Series
-            box(plotOutput("timeseries_plot"), width = 12),
+            box(plotOutput("timeseries_plot"), width = 10),
             #Input Box Plot
-            box(plotOutput("litterfall_box"), width = 12)),
+            box(plotlyOutput("litterfall_box"), width = 10)),
     
+    #Input Species Visualization
+    tabItem(tabName = "Litterfall_Species",
+            h1("Litterfall Data: Species Visualization"),
+            box(width = 3, sliderInput("Species_Year", label = em("Date Range:",
+                                                          style = "text-align:center;color black;font-size:100%"),
+                                       min = min(Litterfall$Year),
+                                       max = max(Litterfall$Year),
+                                       value = c(min(Litterfall$Year), max(Litterfall$Year)),
+                                       sep = "",
+                                       step = 1)),
+            #Input for Treatment
+            box(width = 3, selectInput("Species_Treatment", label = em("Select Treatment:",
+                                                               style = "text-align:center;color black;font-size:100%"),
+                                       choices = unique(Litterfall$Treatment), multiple = TRUE, selected = c("N", "P", "NP", "Ca", "C"))),
+            
+            #Input for Species
+            box(width = 3, selectInput("Species", label = em("Select Species:",
+                                                               style = "text-align:center;color black;font-size:100%"),
+                                        choices = c("ASH", "BASP", "BASS", "BE", "HB", "OAK"), multiple = FALSE, selected = "ASH")),
+            box(plotOutput("litter_species_plot"), width = 12)),
+            
     #Input Data Table
     tabItem(tabName = "Litterfall_Data",
             h1("Litterfall Data"),
-            DT:: dataTableOutput("litterfalltable"),
-    )
+            DT:: dataTableOutput("litterfalltable"))
+    
   ))
 )
+
 
 server <- function(input, output) {
   
@@ -76,26 +103,27 @@ server <- function(input, output) {
     max <- input$Year[2]
     Treatmentselection <- input$Treatment
     Standselection <- input$Stand
-    
+    Plotselection <- input$Plot
     
     Litterfall %>%
       filter(Year >= min & Year <= max) %>%
-      filter(Stand %in% Standselection & Treatment %in% Treatmentselection) %>%
+      filter(Stand %in% Standselection & Treatment %in% Treatmentselection & Plot %in% Plotselection) %>%
       mutate(Year = as.factor(Year)) %>%
       ggplot(aes(x = Year, y = whole.mass)) +
       geom_boxplot(aes(x = Year, y = whole.mass, color = Treatment), position = position_dodge(0.8), lwd = 1)+
       geom_dotplot(aes(x = Year, y = whole.mass, color = Treatment), position = position_dodge(0.8), 
                    binaxis = "y", binwidth = 3)+
-      theme_bw() +
       theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+      theme_bw() +
       labs(title ="Time Series: Litterfall Mass vs. Time",
            x = "Year",
            y = "Mass (g litter /m2)") +
-      facet_wrap(facets = "Stand", ncol = 4)
+      facet_wrap(facets = "Stand", ncol = 4) 
+      
   })
   
   #Litterfall boxplot output
-  output$litterfall_box <- renderPlot({
+  output$litterfall_box <- renderPlotly({
     min <- input$Year[1]
     max <- input$Year[2]
     Treatmentselection <- input$Treatment
@@ -110,10 +138,36 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
       theme_bw() +
+      scale_fill_brewer(palette = "Set1") +
       labs(title ="Boxplot: Litterfall Mass vs. Treatment Type",
            x = "Treatment",
            y = "Mass (g litter /m2)") +
       facet_wrap(facets = "Stand", ncol = 4)
+    
+  })
+  
+  #Litterfall Species Plot Output
+  outputlitter_species_plot <- renderPlot({
+    min <- input$Species_Year[1]
+    max <- input$Species_Year[2]
+    Treatmentselection <- input$Species_Treatment
+    Speciesselection <- input$Species
+    
+    SpeciesLitter %>%
+      filter(Year >= min & Year <= max) %>%
+      filter(Treatment %in% Treatmentselection & Species %in% Speciesselection) %>%
+      mutate(Year = as.factor(Year)) %>%
+      ggplot(aes(x = Year, y = whole.mass)) +
+      geom_boxplot(aes(x = Year, y = whole.mass, color = Treatment), position = position_dodge(0.8), lwd = 1)+
+      geom_dotplot(aes(x = Year, y = whole.mass, color = Treatment), position = position_dodge(0.8), 
+                   binaxis = "y", binwidth = 3)+
+      theme_bw() +
+      theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+      labs(title ="Time Series: Litterfall Mass vs. Time",
+           x = "Year",
+           y = "Mass (g litter /m2)") +
+      facet_wrap(facets = "Treatment", ncol = 4)
+    
     
   })
   #Litterfall data table output
