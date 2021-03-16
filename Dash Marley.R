@@ -21,6 +21,7 @@ lat_long <-
   read_csv("Data/lat_long.csv")
 
 
+
 LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment, whole.mass) %>%
   rename("Mass" = 7)
 
@@ -158,16 +159,13 @@ server <- function(input, output) {
       filter(Treatment %in% Treatmentselection & Species %in% Speciesselection) %>%
       mutate(Year = as.factor(Year)) %>%
       ggplot(aes(x = Year, y = whole.mass)) +
-      geom_boxplot(aes(x = Year, y = whole.mass, color = Treatment), position = position_dodge(0.8), lwd = 1)+
-      geom_dotplot(aes(x = Year, y = whole.mass, color = Treatment), position = position_dodge(0.8), 
-                   binaxis = "y", binwidth = 3)+
       theme_bw() +
       theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-      labs(title ="Time Series: Litterfall Mass vs. Time",
+      labs(title ="Time Series Based on Species: Litterfall Mass vs. Time",
            x = "Year",
            y = "Mass (g litter /m2)") +
       facet_wrap(facets = "Treatment", ncol = 4)
-    
+  
     
   })
   #Litterfall data table output
