@@ -30,6 +30,9 @@ CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, trea
 
 lat_long <- lat_long%>% mutate(popup_info = paste("Stand:",Site))
 
+LitterBasketLoc <- select(LitterBasket_Coord, stand, basket, stake1_utm_x, stake1_utm_y)
+
+LitterMerge <- merge(litterfall, LitterBasketLoc)
 
 colors <- c("green", "blue")
 pal <- colorFactor(colors, lat_long$Site)
@@ -84,7 +87,7 @@ ui <- dashboardPage(
   )
 
 server <- function(input, output) {
-#Map Server Code
+#Stand Selection Server Code
   output$StandMap <- renderLeaflet({
     
     StandSelect <- input$Site
@@ -101,6 +104,24 @@ server <- function(input, output) {
                        popup = ~popup_info,
                        color = ~pal(Site))
     })
+  
+#Treatment Selection Server Code
+  output$StandMap <- renderLeaflet({
+    
+    StandSelect <- input$Site
+    
+    lat_long <- lat_long %>%
+      filter(Site %in% StandSelect)
+    
+    leaflet()%>% 
+      addTiles()%>% 
+      addCircleMarkers(data = lat_long,
+                       lat = ~Lat, 
+                       lng = ~Long, 
+                       radius = 3,
+                       popup = ~popup_info,
+                       color = ~pal(Site))
+  })
 }
 
 
