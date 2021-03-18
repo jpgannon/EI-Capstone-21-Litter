@@ -263,7 +263,6 @@ server <- function(input, output) {
     Standselection <- input$Grouped_Stand
     Plotselection <- input$Grouped_Plot
     
-    
     GroupedLitter %>%
       filter(Year >= min & Year <= max) %>%
       filter(Stand %in% Standselection & Treatment %in% Treatmentselection & Plot %in% Plotselection) %>%
