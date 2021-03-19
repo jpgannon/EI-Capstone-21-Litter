@@ -588,6 +588,7 @@ server <- function(input, output) {
     Plotselection <- input$Grouped_Plot
     
     GroupedLitter %>%
+      ungroup() %>% 
       filter(Year >= min & Year <= max) %>%
       filter(Stand %in% Standselection & Treatment %in% Treatmentselection & Plot %in% Plotselection) %>%
       mutate(Year = as.factor(Year)) %>%
