@@ -64,7 +64,7 @@ LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment,
 
 #Create color palet used for interactive map
 colors <- c("green", "blue")
-pal <- colorFactor(colors, lat_long$Site)
+pal <- colorFactor(colors, lat_long$Stand)
 
 #Grouping Data and creating tree species dataframe
 Species <- c("ASH", "BASP", "BASS", "BE", "HB", "OAK", "PC", "RM", "SM", "STM", "WB","YB", 
@@ -85,14 +85,6 @@ ui <- dashboardPage(
   dashboardSidebar(sidebarMenu(
     menuItem("Home Page", tabName = "Home_Page", icon = icon("home")),
     menuItem("Map", tabName = "Map", icon = icon("globe")),
-    menuItem("Bivariate Analysis", icon = icon("globe"), startExpanded = TRUE,
-             menuSubItem("Litterfall Bivariate",
-                         tabName = "Litterfall_BiVar",
-                         icon = icon("bar-chart-o")),
-             menuSubItem("Soil Respiration Bivariate",
-                         tabName = "SoilRespiration_BiVar",
-                         icon = icon("bar-chart-o"))),
-    
     menuItem("Litterfall", icon = icon("globe"), startExpanded = TRUE,
              menuSubItem("Litterfall Charts",
                          tabName = "Litterfall",
@@ -115,6 +107,13 @@ ui <- dashboardPage(
                          icon = icon("bar-chart-o")),
              menuSubItem("Soil Respiration Temp Average",
                          tabName = "SoilRespiration_TMean",
+                         icon = icon("bar-chart-o"))),
+    menuItem("Bivariate Analysis", icon = icon("globe"), startExpanded = TRUE,
+             menuSubItem("Litterfall Bivariate",
+                         tabName = "Litterfall_BiVar",
+                         icon = icon("bar-chart-o")),
+             menuSubItem("Soil Respiration Bivariate",
+                         tabName = "SoilRespiration_BiVar",
                          icon = icon("bar-chart-o"))),
     menuItem("Explore Data", icon = icon("tint"), startExpanded = TRUE,
              menuSubItem("Litterfall Data",
@@ -195,7 +194,7 @@ ui <- dashboardPage(
             fluidRow(box(width = 12, leafletOutput("StandMap")))),
     #Name and layout of Litterfall tab
     tabItem(tabName = "Litterfall",
-            h1("Litterfall"),
+            h1("Litterfall Charts"),
             #Input for Year 
             box(width = 3, sliderInput("Year", label = em("Date Range:",
                                                           style = "text-align:center;color black;font-size:100%"),
@@ -220,7 +219,7 @@ ui <- dashboardPage(
     
     #Input Species Visualization
     tabItem(tabName = "Litterfall_Species",
-            h1("Litterfall"),
+            h1("Litterfall Species Charts"),
             #Input Year
             box(width = 4, sliderInput("Species_Year", label = em("Date Range:",
                                                                   style = "text-align:center;color black;font-size:100%"),
@@ -302,7 +301,7 @@ ui <- dashboardPage(
     ),
     #Name and layout of soil respiration tab
     tabItem(tabName = "Soil_Respiration",
-            h1("Soil Respiration"),
+            h1("Soil Respiration Flux"),
             
             #User input for date range
             box(width = 12, dateRangeInput("date", "Date Range:",
