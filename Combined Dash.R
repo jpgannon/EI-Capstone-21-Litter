@@ -58,13 +58,43 @@ ui <- dashboardPage(
                              icon = icon("bar-chart-o")),
                  menuSubItem("Soil Respiration Data",
                              tabName = "SoilRespiration_Data",
-                             icon = icon("book")))
-    )),
+                             icon = icon("book"))),
+        menuItem("Bivariate Plots", icon = icon("globe"), startExpanded = TRUE,
+                  menuSubItem("Bivariate Plot",
+                              tabName = "Bivariate Plots",
+                              icon = icon("bar-chart-o")))),
+                
     dashboardBody(tabItems(
         #Creates homepage tab
         tabItem(tabName = "Home_Page",
-                h1("Home Page, desciption of app and
-               how to use will be placed here")),
+                h1("How to Use the App:"),
+                #Map Description
+                box(width = 12, helpText("The interactive map that allows you to visualize 
+                                         data by plotting circle markers on a world map. 
+                                         Markers will show up based on user input in the Stand, Treatment, and year boxes, or a combination.  
+                                         In addition, if you click on the points placed on the map you will see additional pop-up info such as.")
+                    ),
+                #Litterfall Description
+                box(width = 12, helpText(
+                  "Litterfall Tab: Within the litterfall tab, the user can choose which 
+                  way they want to visualize this data. In the first tab the user can visualize the littefall mass over time
+                  through a time series plot and boxplot. Theuser can choose the date range, which treatment types they want to visualize, the stand and plot.
+                  The next tab is a data table showing the litterfall data. 
+                  The third tab includes a boxplot that lets the user visualize the 
+                  affect of treatment type on the litterfall mass of individual tree species over time.")
+                  ),
+                #Soil Resp Description
+                box(width = 12, helpText("There will be four tabs.")
+                    ),
+                    
+                box(width = 12, helpText("Interactive bivariate plots for both Litterfall and Soil Respiration datasets. 
+                User can select variables of interest (for their desired dataset) and ultimately visualize the relationship in a scatter plot. 
+                The user is able to select other parameters that can narrow their plot input.")
+                    ),),
+        
+        
+                
+                
         #Creates interactive map tab with basic functions
         tabItem(tabName = "Interactive Map",
                 h1("Interactive map of tree stands under study"),
