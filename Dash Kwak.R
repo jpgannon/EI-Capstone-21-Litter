@@ -23,19 +23,51 @@ StandLocations <-
   read_csv("Data/StandLocations.csv")
 lat_long <-
   read_csv("Data/lat_long.csv")
+LitterBasket_Coord <-
+  read_csv("Data/LitterBasket_Coord.csv")
+Subplot_Coord <-
+  read_csv("Data/Subplot_Coord.csv")
+
+#converting UTM to Lat Long
+LitterUTM <- select(LitterBasket_Coord, stand, plot, basket, stake1_utm_x, stake1_utm_y)
+
+utm <- SpatialPoints(LitterUTM[c("stake1_utm_x", "stake1_utm_y")], proj4string=CRS("+proj=utm +zone=19T +datum=WGS84"))
+
+Lat_Long_Lit <- spTransform(utm, CRS("+proj=longlat +datum=WGS84"))
+
+Lat_Long_Lit <- as.data.frame(Lat_Long_Lit)
+
+write_csv(Lat_Long_Lit, "Lat_Long_Lit")
+
+Litterfall_Lat_Long <- LitterUTM %>% 
+  mutate(Lat = Lat_Long_Lit$stake1_utm_y) %>% 
+  mutate(Long = Lat_Long_Lit$stake1_utm_x)
+
+lat_long <- lat_long %>%
+  rename(Stand = Site, Basket = Stake)
+
+Litterfall_Lat_Long <- Litterfall_Lat_Long %>% 
+  rename(Stand = stand, Plot = plot, Basket = basket)
+
+LitterMerge <-merge(Litterfall, lat_long, by = c('Stand', 'Plot', 'Basket'), all = TRUE)
+
+LitterMerge <- LitterMerge%>% 
+  mutate(popup_info = paste("Stand:", Stand, "<br/>",
+                            "Plot:", Plot, "<br/>",
+                            "Basket:", Basket, "<br/>",
+                            "Year:", Year, "<br/>",
+                            "Treatment:", Treatment, "<br/>",
+                            "Mass per Unit Area", mass.per.unit.area))
 
 #Filter soil resp data and converted to correct date format 
 CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, treatment) %>%
   mutate(date = mdy(date))
 
-lat_long <- lat_long%>% mutate(popup_info = paste("Stand:",Site))
-
-LitterBasketLoc <- select(LitterBasket_Coord, stand, basket, stake1_utm_x, stake1_utm_y)
-
-LitterMerge <- merge(litterfall, LitterBasketLoc)
+lat_long <- lat_long%>% 
+  mutate(popup_info = paste("Stand:",Stand))
 
 colors <- c("green", "blue")
-pal <- colorFactor(colors, lat_long$Site)
+pal <- colorFactor(colors, LitterMerge$Stand)
 
 
 #Dashboard setup
@@ -49,32 +81,35 @@ ui <- dashboardPage(
     menuItem("Soil Respiration", tabName = "Soil_Respiration", icon = icon("tint"))
   )),
   dashboardBody(tabItems(
+    #Creates homepage tab
     tabItem(tabName = "Home_Page",
             h1("Home Page, desciption of app and
                how to use will be placed here")),
+    #Creates interactive map tab with basic functions
     tabItem(tabName = "Map",
             h1("Interactive map of tree stands under study"),
-            #User input for date range
-            box(width = 12, dateRangeInput("MapDate", "Date Range:",
-                                           start = "2008-07-01",
-                                           end = "2020-07-25",
-                                           min = "2008-07-01",
-                                           max = "2020-07-25"),
-            ),
-            #User input for stand type 
+            #User input for stand type
+            #"HBCa""W5", "HB", "JB" not working
             box(width = 6, selectInput("Site", "Select Stand :",
-                                       c("HBO", "HBM", "JBO", "C9", "C6",
-                                         "HB", "JB", "C1", "C2", "C3",   
-                                         "C4", "C5", "C7", "C8", "W5", 
-                                         "JBM", "HBCa"),
-                                       selectize = TRUE, multiple = TRUE, selected = "HBO"),
+                                       c( "C1", "C2", "C3", "C4", 
+                                         "C5", "C6", "C7", "C8",
+                                         "C9", "HBO", "HBM", "JBO", 
+                                         "JBM"),
+                                       selectize = TRUE, multiple = TRUE, selected = "C1"),
             ),
             #User input for treatment type             
             box(width = 6, selectInput("MapTreatment", "Select Treatment:",
                                        c("P", "N", "NP", "C", "Ca"),
-                                       selectize = TRUE, multiple = TRUE, selected =c("N", "P")),
+                                       selectize = TRUE, multiple = TRUE, selected = "P"),
             ),
-            #New Map Code
+            #User input for date range
+            box(width = 12, sliderInput("MapDate", "Year Range:",
+                                        min = min(Litterfall$Year),
+                                        max = max(Litterfall$Year),
+                                        value = 2020,
+                                        sep = "")
+            ),
+            #Creates Box for world Map
             fluidRow(box(width = 12, leafletOutput("StandMap")))),
     #Name and layout of Litterfall tab
     tabItem(tabName = "Litterfall",
@@ -91,37 +126,23 @@ server <- function(input, output) {
   output$StandMap <- renderLeaflet({
     
     StandSelect <- input$Site
-
-    lat_long <- lat_long %>%
-      filter(Site %in% StandSelect)
+    TreatmentSelect <- input$MapTreatment
+    YearSelect <- input$MapDate
+    
+    LitterMerge1 <- LitterMerge %>%
+      filter(Stand %in% StandSelect) %>% 
+      filter(Treatment %in% TreatmentSelect) %>% 
+      filter(Year %in% YearSelect)
     
     leaflet()%>% 
       addTiles()%>% 
-      addCircleMarkers(data = lat_long,
+      addCircleMarkers(data = LitterMerge1,
                        lat = ~Lat, 
                        lng = ~Long, 
                        radius = 3,
                        popup = ~popup_info,
-                       color = ~pal(Site))
+                       color = ~pal(Stand))
     })
-  
-#Treatment Selection Server Code
-  output$StandMap <- renderLeaflet({
-    
-    StandSelect <- input$Site
-    
-    lat_long <- lat_long %>%
-      filter(Site %in% StandSelect)
-    
-    leaflet()%>% 
-      addTiles()%>% 
-      addCircleMarkers(data = lat_long,
-                       lat = ~Lat, 
-                       lng = ~Long, 
-                       radius = 3,
-                       popup = ~popup_info,
-                       color = ~pal(Site))
-  })
 }
 
 
