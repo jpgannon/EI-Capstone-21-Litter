@@ -59,8 +59,6 @@ LitterMerge <- LitterMerge%>%
                             "Treatment:", Treatment, "<br/>",
                             "Mass per Unit Area", mass.per.unit.area))
 
-
-
 #Filter soil resp data and converted to correct date format 
 CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, treatment) %>%
   mutate(date = mdy(date))
@@ -83,9 +81,11 @@ ui <- dashboardPage(
     menuItem("Soil Respiration", tabName = "Soil_Respiration", icon = icon("tint"))
   )),
   dashboardBody(tabItems(
+    #Creates homepage tab
     tabItem(tabName = "Home_Page",
             h1("Home Page, desciption of app and
                how to use will be placed here")),
+    #Creates interactive map tab with basic functions
     tabItem(tabName = "Map",
             h1("Interactive map of tree stands under study"),
             #User input for stand type
@@ -109,7 +109,7 @@ ui <- dashboardPage(
                                         value = 2020,
                                         sep = "")
             ),
-            #Creates Box for Map
+            #Creates Box for world Map
             fluidRow(box(width = 12, leafletOutput("StandMap")))),
     #Name and layout of Litterfall tab
     tabItem(tabName = "Litterfall",
