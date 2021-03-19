@@ -66,7 +66,7 @@ ui <- dashboardPage(
                 h1("Home Page, desciption of app and
                how to use will be placed here")),
         #Creates interactive map tab with basic functions
-        tabItem(tabName = "Interactive Map",
+        tabItem(tabName = "Map",
                 h1("Interactive map of tree stands under study"),
                 #User input for date range on map
                 box(width = 12, dateRangeInput("MapDate", "Date Range:",
