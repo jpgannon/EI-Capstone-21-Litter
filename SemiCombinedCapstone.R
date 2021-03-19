@@ -75,7 +75,8 @@ GroupedLitter <- LitterTable %>% group_by(Year, Stand, Treatment, Plot) %>%
 
 GroupedSoilData <- CleanSoilResp %>%
   group_by(date, stand, treatment) %>%
-  summarize(flux = mean(flux), temperature = mean(temperature))
+  summarize(flux = mean(flux), temperature = mean(temperature)) %>% 
+  ungroup()
 
 
 #Dashboard setup
@@ -171,7 +172,7 @@ ui <- dashboardPage(
             h1("Interactive map of tree stands under study"),
             #User input for stand type
             #"HBCa""W5", "HB", "JB" not working
-            box(width = 6, selectInput("Site", "Select Stand :",
+            box(width = 6, selectInput("MapSite", "Select Stand :",
                                        c( "C1", "C2", "C3", "C4", 
                                           "C5", "C6", "C7", "C8",
                                           "C9", "HBO", "HBM", "JBO", 
@@ -441,7 +442,7 @@ server <- function(input, output) {
   #Uses sites from input above to create cirlce markers for each specific Stands on interactive map
   output$StandMap <- renderLeaflet({
     
-    StandSelect <- input$Site
+    StandSelect <- input$MapSite
     TreatmentSelect <- input$MapTreatment
     YearSelect <- input$MapDate
     
@@ -484,31 +485,7 @@ server <- function(input, output) {
     
     
   })
-  
-  output$flux_ts_plot <- renderPlot({
-    startdate <- input$date[1]
-    enddate <- input$date[2]
-    standselection <- input$stand
-    treatmentselection <- input$treatment
-    
-    CleanSoilResp %>%
-      filter(date >= startdate & date <= enddate)%>%
-      filter(stand %in% standselection & treatment %in% treatmentselection)%>%
-      mutate(date = as.factor(date))%>%
-      ggplot(aes(x = date, y = flux))+
-      geom_boxplot(aes(x = date, y = flux, color = treatment), position = position_dodge(0.8))+
-      geom_dotplot(aes(x = date, y = flux, fill = treatment), position = position_dodge(0.8), 
-                   binaxis = "y")+
-      theme_bw()+
-      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0))+
-      labs(title = "Soil Respiration Flux", 
-           x = "Date", 
-           y = "CO2 efflux per unit area (μg CO2/m2/s)")+
-      facet_wrap(facets = "stand", ncol = 4)
-    
-    
-  })
-  
+  #Soil Resp box plots
   output$soil_boxplot <- renderPlotly({
     startdate <- input$date[1]
     enddate <- input$date[2]
@@ -654,6 +631,7 @@ server <- function(input, output) {
     LitterTable, options = list(pageLength = 20)
     
   )
+  #Temperature Timeseries Plot
   output$temp_ts_plot <- renderPlot({
     startdate <- input$temp_date[1]
     enddate <- input$temp_date[2]
@@ -676,7 +654,7 @@ server <- function(input, output) {
       facet_wrap(facets = "stand", ncol = 4)
     
   })
-  
+  # Temperature Boxplot
   output$temp_boxplot <- renderPlotly({
     startdate <- input$date[1]
     enddate <- input$date[2]
@@ -698,7 +676,7 @@ server <- function(input, output) {
       facet_wrap(facets = "stand", ncol = 4)
     
   })
-  
+  #Line Timeseries Plot
   output$line_ts_plot <- renderPlot({
     startdate <- input$line_date[1]
     enddate <- input$line_date[2]
@@ -720,7 +698,7 @@ server <- function(input, output) {
       facet_wrap(facets = "stand", ncol = 4)
     
   })
-  
+  #Line Box Plot
   output$line_boxplot <- renderPlotly({
     startdate <- input$line_date[1]
     enddate <- input$line_date[2]
@@ -742,6 +720,7 @@ server <- function(input, output) {
       facet_wrap(facets = "stand", ncol = 4)
     
   })
+  #Tmean Time Series Plot
   output$TMean_ts_plot <- renderPlot({
     startdate <- input$TMean_date[1]
     enddate <- input$TMean_date[2]
@@ -764,7 +743,7 @@ server <- function(input, output) {
     
     
   })
-  
+  #TMean Box plot
   output$TMean_boxplot <- renderPlotly({
     startdate <- input$TMean_date[1]
     enddate <- input$TMean_date[2]
