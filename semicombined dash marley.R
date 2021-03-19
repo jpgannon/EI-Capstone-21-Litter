@@ -123,6 +123,7 @@ ui <- dashboardPage(
                          tabName = "SoilRespiration_Data",
                          icon = icon("book")))
   )),
+  
   dashboardBody(tabItems(
     tabItem(tabName = "Home_Page",
             h1("User Guide: Description of Tabs"),
