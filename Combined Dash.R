@@ -96,7 +96,6 @@ ui <- dashboardPage(
         #Creates interactive map tab with basic functions
         tabItem(tabName = "Map",
                 h1("Interactive map of tree stands under study"),
-                h1("Interactive map of tree stands under study"),
                 #User input for stand type
                 #"HBCa""W5", "HB", "JB" not working
                 box(width = 6, selectInput("Site", "Select Stand :",
