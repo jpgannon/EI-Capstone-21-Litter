@@ -552,7 +552,6 @@ server <- function(input, output) {
     Plotselection <- input$Plot
     
     
-    
     Litterfall %>%
       filter(Year >= min & Year <= max) %>%
       filter(Stand %in% Standselection & Treatment %in% Treatmentselection & Plot %in% Plotselection) %>%
