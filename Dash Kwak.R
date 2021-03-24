@@ -66,8 +66,8 @@ CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, trea
 lat_long <- lat_long%>% 
   mutate(popup_info = paste("Stand:",Stand))
 
-colors <- c("green", "blue")
-pal <- colorFactor(colors, LitterMerge$Stand)
+colors <- c("green", "blue", "red")
+pal <- colorFactor(colors, LitterMerge$Treatment)
 
 
 #Dashboard setup
@@ -141,7 +141,7 @@ server <- function(input, output) {
                        lng = ~Long, 
                        radius = 3,
                        popup = ~popup_info,
-                       color = ~pal(Stand))
+                       color = ~pal(Treatment))
     })
 }
 
