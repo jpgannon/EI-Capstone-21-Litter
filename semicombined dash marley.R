@@ -585,7 +585,7 @@ server <- function(input, output) {
            x = "Year",
            y = "Mass (g litter /m2)")
   })
-  
+
   #litterfall all data box plot
   output$all_litter_box <- renderPlot({
     min <- input$Year[1]
