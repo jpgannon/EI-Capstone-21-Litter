@@ -63,8 +63,8 @@ LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment,
   rename("Mass" = 7)
 
 #Create color palet used for interactive map
-colors <- c("green", "blue")
-pal <- colorFactor(colors, lat_long$Stand)
+colors <- c("green", "blue", "red")
+pal <- colorFactor(colors, LitterMerge$Treatment)
 
 #Grouping Data and creating tree species dataframe
 Species <- c("ASH", "BASP", "BASS", "BE", "HB", "OAK", "PC", "RM", "SM", "STM", "WB","YB", 
@@ -127,12 +127,13 @@ ui <- dashboardPage(
   dashboardBody(tabItems(
     tabItem(tabName = "Home_Page",
             h1("User Guide (Description of tabs)"),
-            box(width=12, helpText("Interactive Map Tab: map that allows you to visualize 
-                                       data by plotting circle markers on a world map. 
-                                       Markers will show up based on user input in the 
-                                       Stand, Treatment, and year boxes, or a combination.  
-                                       In addition, if you click on the points placed on 
-                                       the map you will see additional pop-up info such as …. ")
+            box(width = 12, img(src = "MapExample.png", height = 250, width = 350),
+            helpText("Interactive Map Tab: map that allows you to visualize 
+                      data by plotting circle markers on a world map. 
+                      Markers will show up based on user input in the 
+                      Stand, Treatment, and year boxes, or a combination.  
+                      In addition, if you click on the points placed on 
+                      the map you will see additional pop-up info.")
             ),
             box(width=12, helpText("Bivariate Plot Tab: Interactive bivariate plots for both Litterfall and Soil 
                                        Respiration datasets. User can select variables of interest 
@@ -458,7 +459,7 @@ server <- function(input, output) {
                        lng = ~Long, 
                        radius = 3,
                        popup = ~popup_info,
-                       color = ~pal(Stand))
+                       color = ~pal(Treatment))
   })
   
 #Flux timeseries plot based on user input above
@@ -588,6 +589,7 @@ server <- function(input, output) {
     Plotselection <- input$Grouped_Plot
     
     GroupedLitter %>%
+      ungroup() %>% 
       filter(Year >= min & Year <= max) %>%
       filter(Stand %in% Standselection & Treatment %in% Treatmentselection & Plot %in% Plotselection) %>%
       mutate(Year = as.factor(Year)) %>%

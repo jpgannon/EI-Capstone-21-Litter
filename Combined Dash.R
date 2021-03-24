@@ -62,7 +62,7 @@ LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment,
   rename("Mass" = 7)
 
 #Create color palet used for interactive map
-colors <- c("green", "blue")
+colors <- c("green", "blue", "red")
 pal <- colorFactor(colors, lat_long$Site)
 
 
@@ -242,7 +242,7 @@ server <- function(input, output) {
                        lng = ~Long, 
                        radius = 3,
                        popup = ~popup_info,
-                       color = ~pal(Stand))
+                       color = ~pal(Treatment))
   })
     #Soil Respiration time series GGPlot based on user input
     output$flux_ts_plot <- renderPlot({
