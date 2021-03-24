@@ -81,18 +81,18 @@ GroupedSoilData <- CleanSoilResp %>%
 #Dashboard setup
 ui <- dashboardPage(
   skin = "black",
-  dashboardHeader(title = "Dashboard"),
-  dashboardSidebar(sidebarMenu(
-    menuItem("Home Page", tabName = "Home_Page", icon = icon("home")),
+  dashboardHeader(title = "MELNHE", titleWidth = 250),
+  dashboardSidebar(width = 250, sidebarMenu( 
+    menuItem("User Guide", tabName = "Home_Page", icon = icon("home")),
     menuItem("Map", tabName = "Map", icon = icon("globe")),
-    menuItem("Litterfall", icon = icon("globe"), startExpanded = TRUE,
-             menuSubItem("Litterfall Charts",
+    menuItem("Litterfall", icon = icon("leaf"), startExpanded = TRUE,
+             menuSubItem("Litterfall Box Plot",
                          tabName = "Litterfall",
                          icon = icon("bar-chart-o")),
-             menuSubItem("Litterfall Chart Average",
+             menuSubItem("Litterfall Average Plot",
                          tabName = "Litterfall_Grouped",
                          icon = icon("bar-chart-o")),
-             menuSubItem("Litterfall Species",
+             menuSubItem("Litterfall Species Box Plot",
                          tabName = "Litterfall_Species",
                          icon = icon("bar-chart-o"))),
     menuItem("Soil Respiration", icon = icon("tint"), startExpanded = TRUE,
@@ -108,14 +108,14 @@ ui <- dashboardPage(
              menuSubItem("Soil Respiration Temp Average",
                          tabName = "SoilRespiration_TMean",
                          icon = icon("bar-chart-o"))),
-    menuItem("Bivariate Analysis", icon = icon("globe"), startExpanded = TRUE,
+    menuItem("Bivariate Analysis", icon = icon("random"), startExpanded = TRUE,
              menuSubItem("Litterfall Bivariate",
                          tabName = "Litterfall_BiVar",
                          icon = icon("bar-chart-o")),
              menuSubItem("Soil Respiration Bivariate",
                          tabName = "SoilRespiration_BiVar",
                          icon = icon("bar-chart-o"))),
-    menuItem("Explore Data", icon = icon("tint"), startExpanded = TRUE,
+    menuItem("Explore Data", icon = icon("table"), startExpanded = TRUE,
              menuSubItem("Litterfall Data",
                          tabName = "Litterfall_Data",
                          icon = icon("book")),
@@ -127,21 +127,16 @@ ui <- dashboardPage(
   
   dashboardBody(tabItems(
     tabItem(tabName = "Home_Page",
-            h1("User Guide: Description of Tabs"),
-            box(width=12, helpText("Interactive Map Tab: map that allows you to visualize 
+            h1("User Guide"),
+            column(tags$img(src="melnhe1.png",width="1000px",height="90px"),width=10, align = "center"),
+            column(width= 10, helpText(strong("Map Tab:"), "In the Map tab, there is an interactive map that allows the user to visualize 
                                        data by plotting circle markers on a world map. 
-                                       Markers will show up based on user input in the 
-                                       Stand, Treatment, and year boxes, or a combination.  
+                                       Markers will show up based on user input for the 
+                                       stand, treatment, and year, or a combination.  
                                        In addition, if you click on the points placed on 
-                                       the map you will see additional pop-up information. ")
+                                       the map you will see additional pop-up information.", style = "font-size:20px")
             ),
-            box(width=12, helpText("Bivariate Plot Tab: Interactive bivariate plots for both Litterfall and Soil 
-                                       Respiration datasets. User can select variables of interest 
-                                       (for their desired dataset) and ultimately visualize the 
-                                       relationship in a scatter plot. The user is able to select 
-                                       other parameters that can narrow their plot input.")
-            ),
-            box(width = 12, helpText("Litterfall Tab: Within the litterfall tab, the 
+            column(width = 10, helpText(strong("Litterfall Tab:"), "In the Litterfall tab, the 
                                          user can choose which way they want to visualize 
                                          this data. In the first tab the user can visualize
                                          the litterfall mass over time through a time series
@@ -151,9 +146,9 @@ ui <- dashboardPage(
                                          the litterfall data. The third tab includes a boxplot
                                          that lets the user visualize the affect of treatment
                                          type on the litterfall mass of individual tree species
-                                         over time.")
+                                         over time.", style = "font-size:20px")
             ),
-            box(width = 12, helpText("Soil Respiration Tab: User has options to view either
+            column(width = 10, helpText(strong("Soil Respiration Tab:"), "In the Soil Respiration tab, the user has options to view either
                                          all soil respiration data or grouped soil respiration data.
                                          “Soil Respiration Flux” and “Soil Respiration Temp” contain
                                          all data and user is able to filter by date range, stand,
@@ -162,10 +157,17 @@ ui <- dashboardPage(
                                          Average” contain grouped data. The purpose of grouped data
                                          is to represent the mean measurement per day. The user is
                                          able to filter by date range, stand, and treatment for grouped
-                                         data time series and boxplot visualization.")
+                                         data time series and boxplot visualization.", style = "font-size:20px")
             ),
-            box(width = 12, helpText("Explore Data Tab: User has the ability to analyze and view
-                                         cleaned data from the Litterfall and Soil Respiration datasets."))
+            column(width= 10, helpText(strong("Bivariate Analysis Tab:"), "In the Bivariate Analysis tab, there are interactive bivariate plots for both Litterfall and Soil 
+                                       Respiration datasets. The user can select variables of interest 
+                                       (for their desired dataset) and visualize the 
+                                       relationship in a scatter plot. The user is able to select 
+                                       other parameters that can narrow their plot input.", style = "font-size:20px")
+ 
+            ),
+            column(width = 10, helpText(strong("Explore Data Tab:"), "In the Explore Data tab, the user has the ability to analyze and view
+                                         cleaned data from the Litterfall and Soil Respiration datasets.", style = "font-size:20px"))
             
     ),
     #Creates interactive map tab with basic functions
@@ -197,9 +199,9 @@ ui <- dashboardPage(
             fluidRow(box(width = 12, leafletOutput("StandMap")))),
     #Name and layout of Litterfall tab
     tabItem(tabName = "Litterfall",
-            h1("Litterfall Charts"),
+            h1("Litterfall Box Plots"),
             #Input for Year 
-            box(width = 3, sliderInput("Year", label = em("Date Range:",
+            box(width = 3, sliderInput("Year", label = em("Select Date Range:",
                                                           style = "text-align:center;color black;font-size:100%"),
                                        min = min(Litterfall$Year),
                                        max = max(Litterfall$Year),
@@ -214,6 +216,9 @@ ui <- dashboardPage(
             box(width = 3, selectizeInput("Stand", label = em("Select Stand:",
                                                               style = "text-align:center;color black;font-size:100%"),
                                           choices = unique(Litterfall$Stand), multiple = TRUE, selected = "C1")),
+            box(width = 3, selectizeInput("Plot", label = em("Select Plot:",
+                                                                     style = "text-align:center;color black;font-size:100%"),
+                                          choices = unique(Litterfall$Plot), multiple = TRUE, selected = c("1", "2", "3", "4", "5", "7"))),
             
             #Input Time Series
             box(plotOutput("timeseries_plot"), width = 12),
@@ -222,9 +227,9 @@ ui <- dashboardPage(
     
     #Input Species Visualization
     tabItem(tabName = "Litterfall_Species",
-            h1("Litterfall Species Charts"),
+            h1("Litterfall Species Box Plot"),
             #Input Year
-            box(width = 4, sliderInput("Species_Year", label = em("Date Range:",
+            box(width = 4, sliderInput("Species_Year", label = em("Select Date Range:",
                                                                   style = "text-align:center;color black;font-size:100%"),
                                        min = min(Litterfall$Year),
                                        max = max(Litterfall$Year),
@@ -246,8 +251,8 @@ ui <- dashboardPage(
             box(plotlyOutput("litter_species_boxplot"), width = 12),
             
             #Input Species Key
-            box(width = 12, helpText("Species Key:
-                                    ASH: White Ash,
+            box(width = 12, helpText(strong("Species Key:"),
+                                    "ASH: White Ash,
                                     BASP: Bigtooth Aspen,
                                     BASS: Basswood,
                                     BE: American Beech,
@@ -273,7 +278,7 @@ ui <- dashboardPage(
     tabItem(tabName = "Litterfall_Grouped",
             h1("Litterfall Grouped Plots"),
             #Input for Year 
-            box(width = 3, sliderInput("Grouped_Year", label = em("Date Range:",
+            box(width = 3, sliderInput("Grouped_Year", label = em("Select Date Range:",
                                                                   style = "text-align:center;color black;font-size:100%"),
                                        min = min(Litterfall$Year),
                                        max = max(Litterfall$Year),
@@ -287,7 +292,7 @@ ui <- dashboardPage(
             #Input for Stand
             box(width = 3, selectizeInput("Grouped_Stand", label = em("Select Stand:",
                                                                       style = "text-align:center;color black;font-size:100%"),
-                                          choices = unique(Litterfall$Stand), multiple = TRUE, selected = "C1")),
+                                          choices = unique(Litterfall$Stand), multiple = TRUE, selected = "C8")),
             
             box(width = 3, selectizeInput("Grouped_Plot", label = em("Select Plot:",
                                                                      style = "text-align:center;color black;font-size:100%"),
@@ -544,11 +549,12 @@ server <- function(input, output) {
     max <- input$Year[2]
     Treatmentselection <- input$Treatment
     Standselection <- input$Stand
+    Plotselection <- input$Plot
     
     
     Litterfall %>%
       filter(Year >= min & Year <= max) %>%
-      filter(Stand %in% Standselection & Treatment %in% Treatmentselection) %>%
+      filter(Stand %in% Standselection & Treatment %in% Treatmentselection & Plot %in% Plotselection) %>%
       mutate(Year = as.factor(Year)) %>%
       ggplot(aes(x = Year, y = whole.mass)) +
       geom_boxplot(aes(x = Year, y = whole.mass, color = Treatment), position = position_dodge(0.8), lwd = 1)+
