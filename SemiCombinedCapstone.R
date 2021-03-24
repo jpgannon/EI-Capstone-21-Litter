@@ -126,22 +126,16 @@ ui <- dashboardPage(
   )),
   dashboardBody(tabItems(
     tabItem(tabName = "Home_Page",
-            h1("User Guide (Description of tabs)"),
-            box(width = 12, img(src = "MapExample.png", height = 250, width = 350),
-            helpText("Interactive Map Tab: map that allows you to visualize 
-                      data by plotting circle markers on a world map. 
-                      Markers will show up based on user input in the 
-                      Stand, Treatment, and year boxes, or a combination.  
-                      In addition, if you click on the points placed on 
-                      the map you will see additional pop-up info.")
-            ),
-            box(width=12, helpText("Bivariate Plot Tab: Interactive bivariate plots for both Litterfall and Soil 
-                                       Respiration datasets. User can select variables of interest 
-                                       (for their desired dataset) and ultimately visualize the 
-                                       relationship in a scatter plot. The user is able to select 
-                                       other parameters that can narrow their plot input.")
-            ),
-            box(width = 12, helpText("Litterfall Tab: Within the litterfall tab, the 
+            h1("User Guide"),
+            fluidPage(column(tags$img(src="melnhe1.png",width="1000px",height="90px"),width=10, align = "center"),
+                      column(width= 10, helpText(strong("Map Tab:"), "In the Map tab, there is an interactive map that allows the user to visualize 
+                                       data by plotting circle markers on a world map. 
+                                       Markers will show up based on user input for the 
+                                       stand, treatment, and year, or a combination.  
+                                       In addition, if you click on the points placed on 
+                                       the map you will see additional pop-up information.", style = "font-size:20px")
+                      ),
+                      column(width = 10, helpText(strong("Litterfall Tab:"), "In the Litterfall tab, the 
                                          user can choose which way they want to visualize 
                                          this data. In the first tab the user can visualize
                                          the litterfall mass over time through a time series
@@ -151,9 +145,9 @@ ui <- dashboardPage(
                                          the litterfall data. The third tab includes a boxplot
                                          that lets the user visualize the affect of treatment
                                          type on the litterfall mass of individual tree species
-                                         over time.")
-            ),
-            box(width = 12, helpText("Soil Respiration Tab: User has options to view either
+                                         over time.", style = "font-size:20px")
+                      ),
+                      column(width = 10, helpText(strong("Soil Respiration Tab:"), "In the Soil Respiration tab, the user has options to view either
                                          all soil respiration data or grouped soil respiration data.
                                          “Soil Respiration Flux” and “Soil Respiration Temp” contain
                                          all data and user is able to filter by date range, stand,
@@ -162,12 +156,19 @@ ui <- dashboardPage(
                                          Average” contain grouped data. The purpose of grouped data
                                          is to represent the mean measurement per day. The user is
                                          able to filter by date range, stand, and treatment for grouped
-                                         data time series and boxplot visualization.")
-            ),
-            box(width = 12, helpText("Explore Data Tab: User has the ability to analyze and view
-                                         cleaned data from the Litterfall and Soil Respiration datasets."))
-            
-    ),
+                                         data time series and boxplot visualization.", style = "font-size:20px")
+                      ),
+                      column(width= 10, helpText(strong("Bivariate Analysis Tab:"), "In the Bivariate Analysis tab, there are interactive bivariate plots for both Litterfall and Soil 
+                                       Respiration datasets. The user can select variables of interest 
+                                       (for their desired dataset) and visualize the 
+                                       relationship in a scatter plot. The user is able to select 
+                                       other parameters that can narrow their plot input.", style = "font-size:20px")
+                             
+                      ),
+                      column(width = 10, helpText(strong("Explore Data Tab:"), "In the Explore Data tab, the user has the ability to analyze and view
+                                         cleaned data from the Litterfall and Soil Respiration datasets.", style = "font-size:20px"))
+                      
+            )),
     #Creates interactive map tab with basic functions
     tabItem(tabName = "Map",
             h1("Interactive map of tree stands under study"),
@@ -195,7 +196,7 @@ ui <- dashboardPage(
             #Creates map of stands using leaflet
             fluidRow(box(width = 12, leafletOutput("StandMap")))),
     #Name and layout of Litterfall tab
-    tabItem(tabName = "Litterfall",
+    tabItem (tabName = "Litterfall",
             h1("Litterfall Charts"),
             #Input for Year 
             box(width = 3, sliderInput("Year", label = em("Date Range:",
@@ -217,7 +218,7 @@ ui <- dashboardPage(
             #Input Time Series
             box(plotOutput("timeseries_plot"), width = 12),
             #Input Box Plot
-            box(plotOutput("litterfall_box"), width = 12)),
+            fluidRow(box(plotOutput("litterfall_box"), width = 12))),
     
     #Input Species Visualization
     tabItem(tabName = "Litterfall_Species",
@@ -245,7 +246,7 @@ ui <- dashboardPage(
             box(plotlyOutput("litter_species_boxplot"), width = 12),
             
             #Input Species Key
-            box(width = 12, helpText("Species Key:
+            fluidRow(box(width = 12, helpText("Species Key:
                                     ASH: White Ash,
                                     BASP: Bigtooth Aspen,
                                     BASS: Basswood,
@@ -267,7 +268,8 @@ ui <- dashboardPage(
                                     ASP: Bigtooth Aspen,
                                     VIB: Viburnum Lantanoides,
                                     UNK: Unknown,
-                                    NL: Non Leaf"))),
+                                    NL: Non Leaf")))
+            ),
     #Input Grouped Plots
     tabItem(tabName = "Litterfall_Grouped",
             h1("Litterfall Grouped Plots"),
@@ -294,7 +296,8 @@ ui <- dashboardPage(
             #Input Time Series Plot
             box(plotOutput("grouped_timeseries_plot"), width = 12),
             #Input Box Plot
-            box(plotlyOutput("grouped_litter_box"), width = 12)),
+            fluidRow(box(plotlyOutput("grouped_litter_box"), width = 12))
+            ),
     
     #Input Data Table
     tabItem(tabName = "Litterfall_Data",
@@ -332,8 +335,8 @@ ui <- dashboardPage(
             box(plotOutput("flux_ts_plot"), width = 12),
             
             #Making the boxplot analysis
-            box(plotlyOutput("soil_boxplot"), width = 12),
-    ),
+            fluidRow(box(plotlyOutput("soil_boxplot"), width = 12))
+            ),
     
     #Name and layout of Temp soil respiration tab
     tabItem(tabName = "SoilRespiration_Temp",
@@ -365,8 +368,8 @@ ui <- dashboardPage(
             box(plotOutput("temp_ts_plot"), width = 12),
             
             #Making the boxplot analysis
-            box(plotlyOutput("temp_boxplot"), width = 12),
-    ),
+            fluidRow(box(plotlyOutput("temp_boxplot"), width = 12))
+            ),
     
     tabItem(tabName = "SoilRespiration_FluxMean",
             h1("Average Soil Respiration Flux"),
@@ -397,8 +400,8 @@ ui <- dashboardPage(
             
             
             
-            box(plotlyOutput("line_boxplot"), width = 12)
-    ),
+            fluidRow(box(plotlyOutput("line_boxplot"), width = 12))
+            ),
     
     tabItem(tabName = "SoilRespiration_TMean",
             h1("Soil Respiration Temperature Average"),
@@ -429,7 +432,7 @@ ui <- dashboardPage(
             
             
             
-            box(plotlyOutput("TMean_boxplot"), width = 12)
+            fluidRow(box(plotlyOutput("TMean_boxplot"), width = 12))
     ), 
     #Making tab for table to explore soil respiration data
     tabItem(tabName = "SoilRespiration_Data",
