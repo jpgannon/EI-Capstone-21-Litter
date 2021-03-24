@@ -77,6 +77,8 @@ GroupedSoilData <- CleanSoilResp %>%
   group_by(date, stand, treatment) %>%
   summarize(flux = mean(flux), temperature = mean(temperature))
 
+AllLitter <- Litterfall  %>% group_by(Year, Treatment, whole.mass)
+
 
 #Dashboard setup
 ui <- dashboardPage(
@@ -86,6 +88,9 @@ ui <- dashboardPage(
     menuItem("User Guide", tabName = "Home_Page", icon = icon("home")),
     menuItem("Map", tabName = "Map", icon = icon("globe")),
     menuItem("Litterfall", icon = icon("leaf"), startExpanded = TRUE,
+             menuSubItem("Litterfall Time Series",
+                         tabName = "Litterfall_All",
+                         icon = icon("bar-chart-o")),
              menuSubItem("Litterfall Box Plot",
                          tabName = "Litterfall",
                          icon = icon("bar-chart-o")),
@@ -198,6 +203,25 @@ ui <- dashboardPage(
             #Creates map of stands using leaflet
             fluidRow(box(width = 12, leafletOutput("StandMap")))),
     #Name and layout of Litterfall tab
+    tabItem(tabName = "Litterfall_All",
+            h1("Litterfall Time Series Plot"),
+            #Input for Date
+            box(width = 3, sliderInput("Year", label = em("Select Date Range:",
+                                                          style = "text-align:center;color black;font-size:100%"),
+                                       min = min(Litterfall$Year),
+                                       max = max(Litterfall$Year),
+                                       value = c(min(Litterfall$Year), max(Litterfall$Year)),
+                                       sep = "",
+                                       step = 1)),
+            #Input for Treatment
+            box(width = 3, selectInput("Treatment", label = em("Select Treatment:",
+                                                               style = "text-align:center;color black;font-size:100%"),
+                                       unique(Litterfall$Treatment), multiple = TRUE, selected = c("N", "P"))),
+            #Input for Time Series
+            box(plotOutput("all_litter_time"), width = 12),
+            #Input Box Plot
+            box(plotOutput("all_litter_box"), width = 12)),
+  
     tabItem(tabName = "Litterfall",
             h1("Litterfall Box Plots"),
             #Input for Year 
@@ -542,8 +566,45 @@ server <- function(input, output) {
   output$soilresptable = DT::renderDataTable({
     CleanSoilResp
   })
-  
-  #Litterfall time series plot
+  #Litterfall all time series plot
+  output$all_litter_time <- renderPlot({
+    min <- input$Year[1]
+    max <- input$Year[2]
+    Treatmentselection <- input$Treatment
+    
+    AllLitter %>%
+      filter(Year >= min & Year <= max) %>%
+      filter(Treatment %in% Treatmentselection) %>%
+      mutate(Year = as.factor(Year)) %>%
+      ggplot(aes(x = Year, y = whole.mass)) +
+      geom_point(aes(x = Year, y = whole.mass, group = Treatment, color = Treatment))+
+      geom_line(aes(x = Year, y = whole.mass, group = Treatment, color = Treatment))+
+      theme_bw() +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
+      labs(title ="Time Series: Litterfall Mass vs. Time",
+           x = "Year",
+           y = "Mass (g litter /m2)")
+  })
+  #litterfall all data box plot
+  output$all_litter_box <- renderPlot({
+    min <- input$Year[1]
+    max <- input$Year[2]
+    Treatmentselection <- input$Treatment
+
+    AllLitter %>%
+      filter(Year >= min & Year <= max) %>%
+      filter(Treatment %in% Treatmentselection) %>%
+      ggplot(aes(x=Treatment, y=whole.mass, fill = Treatment)) +
+      geom_boxplot(outlier.colour = "red", outlier.shape = 4,
+                   outlier.size = 5, lwd = 1)+
+      geom_line()+
+      theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+      theme_bw() +
+      labs(title ="Boxplot: Litterfall Mass vs. Treatment Type",
+           x = "Treatment",
+           y = "Mass (g litter /m2)")
+  })
+  #Litterfall stand time series plot
   output$timeseries_plot <- renderPlot({
     min <- input$Year[1]
     max <- input$Year[2]
@@ -568,7 +629,7 @@ server <- function(input, output) {
       facet_wrap(facets = "Stand", ncol = 4)
   })
   
-  #Litterfall boxplot output
+  #Litterfall stand boxplot output
   output$litterfall_box <- renderPlot({
     min <- input$Year[1]
     max <- input$Year[2]
