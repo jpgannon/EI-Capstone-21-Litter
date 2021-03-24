@@ -133,7 +133,7 @@ ui <- dashboardPage(
   dashboardBody(tabItems(
     tabItem(tabName = "Home_Page",
             h1("User Guide"),
-            column(tags$img(src="melnhe1.png",width="1000px",height="90px"),width=10, align = "center"),
+            fluidPage(column(tags$img(src="melnhe1.png",width="1000px",height="90px"),width=10, align = "center"),
             column(width= 10, helpText(strong("Map Tab:"), "In the Map tab, there is an interactive map that allows the user to visualize 
                                        data by plotting circle markers on a world map. 
                                        Markers will show up based on user input for the 
@@ -174,7 +174,7 @@ ui <- dashboardPage(
             column(width = 10, helpText(strong("Explore Data Tab:"), "In the Explore Data tab, the user has the ability to analyze and view
                                          cleaned data from the Litterfall and Soil Respiration datasets.", style = "font-size:20px"))
             
-    ),
+    )),
     #Creates interactive map tab with basic functions
     tabItem(tabName = "Map",
             h1("Interactive Map of Tree Stands Under Study"),
