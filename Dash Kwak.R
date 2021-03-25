@@ -67,7 +67,9 @@ lat_long <- lat_long%>%
   mutate(popup_info = paste("Stand:",Stand))
 
 colors <- c("green", "blue", "red")
+colors2 <- c("red", "red4")
 pal <- colorFactor(colors, LitterMerge$Treatment)
+pal2 <- colorFactor(colors2, LitterMerge$mass.per.unit.area)
 
 
 #Dashboard setup
@@ -134,14 +136,27 @@ server <- function(input, output) {
       filter(Treatment %in% TreatmentSelect) %>% 
       filter(Year %in% YearSelect)
     
+    LitterMerge2 <- LitterMerge %>% 
+      filter(Stand %in% StandSelect) %>% 
+      filter(Treatment %in% TreatmentSelect) %>% 
+      filter(Year %in% YearSelect)
+    
     leaflet()%>% 
       addTiles()%>% 
       addCircleMarkers(data = LitterMerge1,
                        lat = ~Lat, 
                        lng = ~Long, 
-                       radius = 3,
+                       radius = 10,
+                       fill = TRUE,
                        popup = ~popup_info,
-                       color = ~pal(Treatment))
+                       color = ~pal(Treatment)) %>% 
+      addCircleMarkers(data = LitterMerge2,
+                       lat = ~Lat, 
+                       lng = ~Long, 
+                       radius = 5,
+                       fill = FALSE,
+                       popup = ~popup_info,
+                       color = ~pal2(mass.per.unit.area))
     })
 }
 
