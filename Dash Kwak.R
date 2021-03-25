@@ -146,7 +146,7 @@ server <- function(input, output) {
       addCircleMarkers(data = LitterMerge1,
                        lat = ~Lat, 
                        lng = ~Long, 
-                       radius = 10,
+                       radius = 5,
                        fill = TRUE,
                        popup = ~popup_info,
                        color = ~pal(Treatment)) %>% 
