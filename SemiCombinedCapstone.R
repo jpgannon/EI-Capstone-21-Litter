@@ -62,6 +62,9 @@ Litterfall <- Litterfall%>%mutate(Treatment = paste(Treatment))
 LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment, whole.mass) %>%
   rename("Mass" = 7)
 
+#Na Values removed for bivariate plots
+dataset <- Litterfall
+
 #Create color palet used for interactive map
 colors <- c("green", "blue", "red")
 pal <- colorFactor(colors, LitterMerge$Treatment)
@@ -509,7 +512,7 @@ server <- function(input, output) {
            x = "Treatment", 
            y = "CO2 efflux per unit area (μg CO2/m2/s)")+
       facet_wrap(facets = "stand", ncol = 4)
-  })
+      })
   
   output$soilresptable = DT::renderDataTable({
     CleanSoilResp
@@ -576,8 +579,10 @@ server <- function(input, output) {
       geom_boxplot(outlier.colour = "red", outlier.shape = 4,
                    outlier.size = 4, lwd = 1)+
       geom_line()+
+      theme(plot.margin = unit(c(1,1,1,1), "cm")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5,  hjust = 0)) +
       theme_bw() +
+      theme(plot.margin = unit(c(1,1,1,1), "cm")) +
       labs(title ="Boxplot: Litterfall Mass vs. Treatment Type",
            x = "Treatment",
            y = "Mass (g litter /m2)")

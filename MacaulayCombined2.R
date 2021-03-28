@@ -74,23 +74,33 @@ pal <- colorFactor(colors, lat_long$Stand)
 Species <- c("ASH", "BASP", "BASS", "BE", "HB", "OAK", "PC", "RM", "SM", "STM", "WB","YB", 
              "QASP", "GB", "MM", "RO", "SEEDS", "TWIGS", "ASP", "VIB", "UNK", "NL")
 
-GroupedLitter <- LitterTable %>% group_by(Year, Treatment) %>%
-  summarize(Mass = mean(Mass))
+GroupedLitter <- LitterTable %>% 
+  group_by(Year, Treatment) %>%
+  summarize(Mass = mean(Mass))%>% 
+  ungroup()
 
-GroupedLitter_Specific <- LitterTable %>% group_by(Year, Stand, Treatment, Plot) %>%
-  summarize(Mass = mean(Mass))
+GroupedLitter_Specific <- LitterTable %>% 
+  group_by(Year, Stand, Treatment, Plot) %>%
+  summarize(Mass = mean(Mass))%>% 
+  ungroup()
 
 GroupedSoilData <- CleanSoilResp %>%
   group_by(date, stand, treatment) %>%
-  summarize(flux = mean(flux), temperature = mean(temperature))
+  summarize(flux = mean(flux), temperature = mean(temperature))%>% 
+  ungroup()
 
-GroupedSoilData %>% mutate(date = ymd(date))
+GroupedSoilData %>% 
+  mutate(date = ymd(date))%>% 
+  ungroup()
 
 GroupedSoilData2 <- CleanSoilResp %>%
   group_by(date, treatment) %>%
-  summarize(flux = mean(flux), temperature = mean(temperature))
+  summarize(flux = mean(flux), temperature = mean(temperature))%>% 
+  ungroup()
 
-GroupedSoilData2 %>% mutate(date = ymd(date))
+GroupedSoilData2 %>% 
+  mutate(date = ymd(date)) %>% 
+  ungroup()
 
 #Dashboard setup
 ui <- dashboardPage(
