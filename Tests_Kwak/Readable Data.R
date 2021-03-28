@@ -60,6 +60,13 @@ LitterMerge <- LitterMerge%>%
                             "Treatment:", Treatment, "<br/>",
                             "Mass per Unit Area", mass.per.unit.area))
 
+#Group Data Set
+#Group Data Set
+GroupedLitterMerge <- LitterMerge %>%
+  group_by(Year, Stand, Treatment, Plot, Basket, popup_info) %>%
+  summarize(WholeMass = mean(whole.mass), Lat = mean(Lat), Long = mean(Long)) %>% 
+  filter(!is.na(Lat))
+
 
 
 #Filter soil resp data and converted to correct date format 

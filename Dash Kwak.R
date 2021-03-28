@@ -43,33 +43,58 @@ Litterfall_Lat_Long <- LitterUTM %>%
   mutate(Lat = Lat_Long_Lit$stake1_utm_y) %>% 
   mutate(Long = Lat_Long_Lit$stake1_utm_x)
 
+#Renaming Colunms
 lat_long <- lat_long %>%
   rename(Stand = Site, Basket = Stake)
-
 Litterfall_Lat_Long <- Litterfall_Lat_Long %>% 
   rename(Stand = stand, Plot = plot, Basket = basket)
 
+#Merge Datasets
 LitterMerge <-merge(Litterfall, lat_long, by = c('Stand', 'Plot', 'Basket'), all = TRUE)
 
+#Create Popup info
 LitterMerge <- LitterMerge%>% 
   mutate(popup_info = paste("Stand:", Stand, "<br/>",
                             "Plot:", Plot, "<br/>",
                             "Basket:", Basket, "<br/>",
                             "Year:", Year, "<br/>",
                             "Treatment:", Treatment, "<br/>",
-                            "Mass per Unit Area", mass.per.unit.area))
+                            "Whole Mass", whole.mass))
+#Group Data Set
+GroupedLitterMerge <- LitterMerge %>%
+  group_by(Year, Stand, Treatment, Plot, Basket, popup_info) %>%
+  summarize(WholeMass = mean(whole.mass), Lat = mean(Lat), Long = mean(Long)) %>% 
+  filter(!is.na(Lat))
+  #ungroup()
 
-#Filter soil resp data and converted to correct date format 
-CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, treatment) %>%
-  mutate(date = mdy(date))
+#Create Popup info
+GroupedLitterMerge <- GroupedLitterMerge%>% 
+  mutate(popup_info = paste("Stand:", Stand, "<br/>",
+                            "Plot:", Plot, "<br/>",
+                            "Basket:", Basket, "<br/>",
+                            "Year:", Year, "<br/>",
+                            "Treatment:", Treatment, "<br/>",
+                            "Average Whole Mass", WholeMass))
 
-lat_long <- lat_long%>% 
-  mutate(popup_info = paste("Stand:",Stand))
-
+#Create Color Palletes
 colors <- c("green", "blue", "red")
-colors2 <- c("red", "red4")
+colors2 <- c("darkorange",
+             "darkorange1",
+             "darkorange2",
+             "darkorange3",
+             "darkorange4")
+
 pal <- colorFactor(colors, LitterMerge$Treatment)
 pal2 <- colorFactor(colors2, LitterMerge$mass.per.unit.area)
+
+
+# create awesome icons
+#litter_icons <- iconList(
+ # Phos = makeIcon("https://fontawesome.com/icons/square?style=solid"),
+  #Carb = makeIcon("https://fontawesome.com/icons/circle?style=solid"),
+  #Nitro = makeIcon("https://fontawesome.com/icons/star?style=solid"),
+  #Both = makeIcon("https://fontawesome.com/icons/certificate?style=solid"))
+
 
 
 #Dashboard setup
@@ -92,7 +117,7 @@ ui <- dashboardPage(
             h1("Interactive map of tree stands under study"),
             #User input for stand type
             #"HBCa""W5", "HB", "JB" not working
-            box(width = 6, selectInput("Site", "Select Stand :",
+            box(width = 6, selectInput("MapSite", "Select Stand :",
                                        c( "C1", "C2", "C3", "C4", 
                                          "C5", "C6", "C7", "C8",
                                          "C9", "HBO", "HBM", "JBO", 
@@ -105,11 +130,11 @@ ui <- dashboardPage(
                                        selectize = TRUE, multiple = TRUE, selected = "P"),
             ),
             #User input for date range
-            box(width = 12, sliderInput("MapDate", "Year Range:",
-                                        min = min(Litterfall$Year),
-                                        max = max(Litterfall$Year),
-                                        value = 2020,
-                                        sep = "")
+            box(width = 12, sliderInput("MapYear", "Year Range:",
+                        min = 2011, 
+                        max = 2020,
+                        value = c(2011, 2020), 
+                        sep = "")
             ),
             #Creates Box for world Map
             fluidRow(box(width = 12, leafletOutput("StandMap")))),
@@ -127,36 +152,26 @@ server <- function(input, output) {
 #Stand Selection Server Code
   output$StandMap <- renderLeaflet({
     
-    StandSelect <- input$Site
+    StandSelect <- input$MapSite
     TreatmentSelect <- input$MapTreatment
-    YearSelect <- input$MapDate
+    YearSelect <- input$MapYear
+    min <- input$MapYear[1]
+    max <- input$MapYear[2]=
     
-    LitterMerge1 <- LitterMerge %>%
+    GroupedLitterMerge <- GroupedLitterMerge %>%
       filter(Stand %in% StandSelect) %>% 
       filter(Treatment %in% TreatmentSelect) %>% 
-      filter(Year %in% YearSelect)
-    
-    LitterMerge2 <- LitterMerge %>% 
-      filter(Stand %in% StandSelect) %>% 
-      filter(Treatment %in% TreatmentSelect) %>% 
-      filter(Year %in% YearSelect)
+      filter(Year >= min & Year <= max)
     
     leaflet()%>% 
       addTiles()%>% 
-      addCircleMarkers(data = LitterMerge1,
+      addCircleMarkers(data = GroupedLitterMerge,
                        lat = ~Lat, 
-                       lng = ~Long, 
-                       radius = 5,
-                       fill = TRUE,
+                       lng = ~Long,
+                       #icon = ~litter_icons,
+                       radius = 3,
                        popup = ~popup_info,
-                       color = ~pal(Treatment)) %>% 
-      addCircleMarkers(data = LitterMerge2,
-                       lat = ~Lat, 
-                       lng = ~Long, 
-                       radius = 5,
-                       fill = FALSE,
-                       popup = ~popup_info,
-                       color = ~pal2(mass.per.unit.area))
+                       color = ~pal(Treatment))
     })
 }
 
