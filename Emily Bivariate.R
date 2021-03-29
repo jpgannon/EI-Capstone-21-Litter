@@ -1,7 +1,7 @@
 library(ggplot2)
 
 Litterfall <-
-  read_csv("Z:/Virginia Tech School Work/Current Classes/Capstone/Project directory/Directory 2/EI-Capstone-21-Litter/Data/Litterfall.csv")
+  read_csv("Data/Litterfall.csv")
 
 dataset <- Litterfall
 
