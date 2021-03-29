@@ -31,25 +31,21 @@ LitterBasket_Coord <-
 
 #converting UTM to Lat Long
 LitterUTM <- select(LitterBasket_Coord, stand, plot, basket, stake1_utm_x, stake1_utm_y)
-
 utm <- SpatialPoints(LitterUTM[c("stake1_utm_x", "stake1_utm_y")], proj4string=CRS("+proj=utm +zone=19T +datum=WGS84"))
-
 Lat_Long_Lit <- spTransform(utm, CRS("+proj=longlat +datum=WGS84"))
-
 Lat_Long_Lit <- as.data.frame(Lat_Long_Lit)
-
 write_csv(Lat_Long_Lit, "Lat_Long_Lit")
-
 Litterfall_Lat_Long <- LitterUTM %>% 
   mutate(Lat = Lat_Long_Lit$stake1_utm_y) %>% 
   mutate(Long = Lat_Long_Lit$stake1_utm_x)
 
+#renaming data to merge tables
 lat_long <- lat_long %>%
   rename(Stand = Site, Basket = Stake)
-
 Litterfall_Lat_Long <- Litterfall_Lat_Long %>% 
   rename(Stand = stand, Plot = plot, Basket = basket)
 
+#Merge Litterset to include Lat and Long, also adding pop up info to litter merge
 LitterMerge <-merge(Litterfall, lat_long, by = c('Stand', 'Plot', 'Basket'), all = TRUE)
 
 LitterMerge <- LitterMerge%>% 
@@ -58,23 +54,72 @@ LitterMerge <- LitterMerge%>%
                             "Basket:", Basket, "<br/>",
                             "Year:", Year, "<br/>",
                             "Treatment:", Treatment, "<br/>",
-                            "Mass per Unit Area", mass.per.unit.area))
+                            "Whole Mass", whole.mass))
 
-#Group Data Set
-#Group Data Set
 GroupedLitterMerge <- LitterMerge %>%
   group_by(Year, Stand, Treatment, Plot, Basket, popup_info) %>%
   summarize(WholeMass = mean(whole.mass), Lat = mean(Lat), Long = mean(Long)) %>% 
   filter(!is.na(Lat))
 
-
+GroupedLitterMerge <- GroupedLitterMerge %>% 
+  mutate(popup_info = paste("Stand:", Stand, "<br/>",
+                            "Plot:", Plot, "<br/>",
+                            "Basket:", Basket, "<br/>",
+                            "Year:", Year, "<br/>",
+                            "Treatment:", Treatment, "<br/>",
+                            "Average Whole Mass", WholeMass))
 
 #Filter soil resp data and converted to correct date format 
 CleanSoilResp <- SoilRespiration %>% select(date, stand, flux, temperature, treatment) %>%
-  mutate(date = mdy(date))
+  mutate(date = mdy(date)) %>%
+  filter(!is.na(date))
 
-lat_long <- lat_long%>% 
-  mutate(popup_info = paste("Stand:",Stand))
 
-colors <- c("green", "blue")
-pal <- colorFactor(colors, LitterMerge$Stand)
+#CleanSoilResp %>% mutate(date = ymd(date))
+
+#Clean up Litterfall Data and create LitterTable
+Litterfall <- Litterfall%>%mutate(Treatment = paste(Treatment))
+LitterTable <- Litterfall %>% select(Year, Season, Site, Stand, Plot, Treatment, whole.mass) %>%
+  rename("Mass" = 7)
+
+#Create color palet used for interactive map
+colors <- c("green", "blue", "red")
+pal <- colorFactor(colors, LitterMerge$Treatment)
+
+#Grouping Data and creating tree species dataframe
+Species <- c("ASH", "BASP", "BASS", "BE", "HB", "OAK", "PC", "RM", "SM", "STM", "WB","YB", 
+             "QASP", "GB", "MM", "RO", "SEEDS", "TWIGS", "ASP", "VIB", "UNK", "NL")
+
+#Grouping Data
+GroupedLitter <- LitterTable %>% 
+  group_by(Year, Treatment) %>%
+  summarize(Mass = mean(Mass))%>% 
+  ungroup()
+
+GroupedLitter <- LitterTable %>% group_by(Year, Treatment) %>%
+  summarize(Mass = mean(Mass , na.rm = TRUE)) %>% 
+  ungroup()
+
+
+GroupedLitter_Specific <- LitterTable %>% 
+  group_by(Year, Stand, Treatment, Plot) %>%
+  summarize(Mass = mean(Mass))%>% 
+  ungroup()
+
+GroupedSoilData <- CleanSoilResp %>%
+  group_by(date, stand, treatment) %>%
+  summarize(flux = mean(flux), temperature = mean(temperature))%>% 
+  ungroup()
+
+GroupedSoilData %>% 
+  mutate(date = ymd(date))%>% 
+  ungroup()
+
+GroupedSoilData2 <- CleanSoilResp %>%
+  group_by(date, treatment) %>%
+  summarize(flux = mean(flux), temperature = mean(temperature))%>% 
+  ungroup()
+
+GroupedSoilData2 %>% 
+  mutate(date = ymd(date)) %>% 
+  ungroup()

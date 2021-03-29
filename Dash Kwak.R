@@ -60,6 +60,7 @@ LitterMerge <- LitterMerge%>%
                             "Year:", Year, "<br/>",
                             "Treatment:", Treatment, "<br/>",
                             "Whole Mass", whole.mass))
+
 #Group Data Set
 GroupedLitterMerge <- LitterMerge %>%
   group_by(Year, Stand, Treatment, Plot, Basket, popup_info) %>%
@@ -156,7 +157,7 @@ server <- function(input, output) {
     TreatmentSelect <- input$MapTreatment
     YearSelect <- input$MapYear
     min <- input$MapYear[1]
-    max <- input$MapYear[2]=
+    max <- input$MapYear[2]
     
     GroupedLitterMerge <- GroupedLitterMerge %>%
       filter(Stand %in% StandSelect) %>% 
