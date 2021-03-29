@@ -32,8 +32,8 @@ ui <- fluidPage(
            checkboxInput('smooth', 'Smooth')
     ),
     column(3, offset = 1,
-           selectInput('x', 'X', names(dataset1)),
-           selectInput('y', 'Y', names(dataset1), names(dataset1)[[2]]),
+           selectInput('Soil_x', 'X', names(dataset1)),
+           selectInput('Soil_y', 'Y', names(dataset1), names(dataset1)[[2]]),
            selectInput('color', 'Color', c('None', names(dataset1)))
            
            
@@ -49,7 +49,7 @@ server <- function(input, output) {
   
   output$plot1 <- renderPlot({
     
-    p <- ggplot(dataset1(), aes_string(x=input$x, y=input$y)) + geom_point()
+    p <- ggplot(dataset1(), aes_string(x=input$Soil_x, y=input$Soil_y)) + geom_point()
     
     if (input$color != 'None')
       p <- p + aes_string(color=input$color)

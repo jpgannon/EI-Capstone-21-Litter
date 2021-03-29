@@ -1,4 +1,5 @@
 library(ggplot2)
+library(tidyverse)
 
 Litterfall <-
   read_csv("Data/Litterfall.csv")
@@ -13,8 +14,7 @@ ui <- fluidPage(
   
   hr(),
   
-  fluidRow(
-    column(2,
+  fluidRow(column(2,
            h4("Litterfall Plot Explorer"),
            sliderInput("Year", "Year Range:",
                        min = min(dataset$Year), 
