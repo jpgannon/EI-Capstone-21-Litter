@@ -11,6 +11,8 @@ library(tidyverse)
 library(ggthemes)
 library(readr)
 library(plotly)
+library(rsconnect)
+
 
 #Read in data
 Litterfall <-
@@ -192,45 +194,21 @@ ui <- dashboardPage(
     tabItem(tabName = "Home_Page",
             h1("User Guide"),
             fluidPage(column(tags$img(src="melnhe1.png",width="1000px",height="90px"),width=10, align = "center"),
-                      column(width= 10, helpText(strong("Map Tab:"), "In the Map tab, there is an interactive map that allows the user to visualize 
-                                       data by plotting circle markers on a world map. 
-                                       Markers will show up based on user input for the 
-                                       stand, treatment, and year, or a combination.  
-                                       In addition, if you click on the points placed on 
-                                       the map you will see additional pop-up information.", style = "font-size:20px")
+                      column(width= 10, helpText(strong("Map Tab:"), "An interactive map that allows the user to visualize data by plotting circle markers on a world map.
+                                                 Markers will show up based on user input for the stand, treatment, and year, or a combination. In addition, if you click on the points placed on the map you will see additional pop-up information.", style = "font-size:20px")
                       ),
-                      column(width = 10, helpText(strong("Litterfall Tab:"), "In the Litterfall tab, the 
-                                         user can choose which way they want to visualize 
-                                         this data. In the first tab the user can visualize
-                                         the litterfall mass over time through a time series
-                                         plot and boxplot. The user can choose the date range,
-                                         which treatment types they want to visualize, the 
-                                         stand and plot. The next tab is a data table showing
-                                         the litterfall data. The third tab includes a boxplot
-                                         that lets the user visualize the affect of treatment
-                                         type on the litterfall mass of individual tree species
-                                         over time.", style = "font-size:20px")
+                      column(width = 10, helpText(strong("Litterfall Tab:"), "The subtabs included in this section visualize litterfall data collected across MELHNE sites.
+                                                  The data visualization category is found on the subtab itself and at the top of the page when the sub tab is selected. Each subtab has unique data filtering methods in which the user must select a date range input and/or a stand type, treatment type, or plot type . Inputs selected by the user will be applied to the litterfall dataset and filtered data will be plotted.", style = "font-size:20px")
                       ),
-                      column(width = 10, helpText(strong("Soil Respiration Tab:"), "In the Soil Respiration tab, the user has options to view either
-                                         all soil respiration data or grouped soil respiration data.
-                                         “Soil Respiration Flux” and “Soil Respiration Temp” contain
-                                         all data and user is able to filter by date range, stand,
-                                         and treatment for time series and boxplot visualization.
-                                         “Soil Respiration Flux Average” and “Soil Respiration Temp
-                                         Average” contain grouped data. The purpose of grouped data
-                                         is to represent the mean measurement per day. The user is
-                                         able to filter by date range, stand, and treatment for grouped
-                                         data time series and boxplot visualization.", style = "font-size:20px")
+                      column(width = 10, helpText(strong("Soil Respiration Tab:"), "The subtabs included in this section visualize soil respiration data collected across MELHNE sites.
+                                                  The data visualization category is found on the subtab itself and at the top of the page when the sun tab is selected. Each subtab has unique data filtering methods in which the user must select a date range input and/or a stand type, treatment type, or plot type . Inputs selected by the user will be applied to the soil respiration dataset and filtered data will be plotted.", style = "font-size:20px")
                       ),
-                      column(width= 10, helpText(strong("Bivariate Analysis Tab:"), "In the Bivariate Analysis tab, there are interactive bivariate plots for both Litterfall and Soil 
-                                       Respiration datasets. The user can select variables of interest 
-                                       (for their desired dataset) and visualize the 
-                                       relationship in a scatter plot. The user is able to select 
-                                       other parameters that can narrow their plot input.", style = "font-size:20px")
+                      column(width= 10, helpText(strong("Bivariate Analysis Tab:"), "There are interactive bivariate plots for both Litterfall and Soil Respiration datasets.
+                                                 The user can select variables of interest (for their desired dataset) and visualize the relationship in a scatter plot. The user is also able to color data points based on other parameters of interest.", style = "font-size:20px")
                              
                       ),
-                      column(width = 10, helpText(strong("Explore Data Tab:"), "In the Explore Data tab, the user has the ability to analyze and view
-                                         cleaned data from the Litterfall and Soil Respiration datasets.", style = "font-size:20px"))
+                      column(width = 10, helpText(strong("Explore Data Tab:"), "These sub tabs included in this section allow the user to explore either the litterfall dataset or the soil respiration dataset.
+                                                  Variables can be filtered to view specific raw data.", style = "font-size:20px"))
                       
             )),
     #Creates interactive map tab with basic functions
