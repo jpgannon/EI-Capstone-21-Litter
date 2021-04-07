@@ -11,9 +11,6 @@ library(tidyverse)
 library(ggthemes)
 library(readr)
 
-#library(sf)
-#library(tigris)
-
 
 Litterfall <-
   read_csv("Data/Litterfall.csv")
@@ -90,11 +87,13 @@ pal2 <- colorFactor(colors2, LitterMerge$mass.per.unit.area)
 
 
 # create awesome icons
-#litter_icons <- iconList(
- # Phos = makeIcon("https://fontawesome.com/icons/square?style=solid"),
-  #Carb = makeIcon("https://fontawesome.com/icons/circle?style=solid"),
-  #Nitro = makeIcon("https://fontawesome.com/icons/star?style=solid"),
-  #Both = makeIcon("https://fontawesome.com/icons/certificate?style=solid"))
+litter_icons <- iconList(
+  Phos = makeIcon("https://fontawesome.com/icons/square?style=solid"),
+  Carb = makeIcon("https://fontawesome.com/icons/circle?style=solid"),
+  Nitro = makeIcon("https://fontawesome.com/icons/star?style=solid"),
+  Both = makeIcon("https://fontawesome.com/icons/certificate?style=solid"))
+
+
 
 
 
@@ -164,12 +163,27 @@ server <- function(input, output) {
       filter(Treatment %in% TreatmentSelect) %>% 
       filter(Year >= min & Year <= max)
     
+    # create awesome icons
+    litter_icons <- iconList(
+      Phos = makeIcon("https://fontawesome.com/icons/square?style=solid"),
+      Carb = makeIcon("https://fontawesome.com/icons/circle?style=solid"),
+      Nitro = makeIcon("https://fontawesome.com/icons/star?style=solid"),
+      Both = makeIcon("https://fontawesome.com/icons/certificate?style=solid"))
+    
+    litter_icons2 <- icons(
+      iconUrl = if(GroupedLitterMerge$Treatment == "P"){"https://fontawesome.com/icons/square?style=solid"}
+      else if(GroupedLitterMerge$Treatment == "C"){"https://fontawesome.com/icons/circle?style=solid"}
+      else if(GroupedLitterMerge$Treatment == "N"){"https://fontawesome.com/icons/star?style=solid"}
+      else if(GroupedLitterMerge$Treatment == "NP"){"https://fontawesome.com/icons/certificate?style=solid"}
+      else {"https://fontawesome.com/icons/heart?style=solid"}
+      )
+    
     leaflet()%>% 
       addTiles()%>% 
       addCircleMarkers(data = GroupedLitterMerge,
                        lat = ~Lat, 
                        lng = ~Long,
-                       #icon = ~litter_icons,
+                       icon = ~litter_icons2,
                        radius = 3,
                        popup = ~popup_info,
                        color = ~pal(Treatment))
