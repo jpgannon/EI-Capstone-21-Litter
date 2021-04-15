@@ -11,7 +11,6 @@ library(tidyverse)
 library(ggthemes)
 library(readr)
 
-
 Litterfall <-
   read_csv("Data/Litterfall.csv")
 SoilRespiration <-
@@ -54,16 +53,19 @@ LitterMerge <- LitterMerge%>%
   mutate(popup_info = paste("Stand:", Stand, "<br/>",
                             "Plot:", Plot, "<br/>",
                             "Basket:", Basket, "<br/>",
-                            "Year:", Year, "<br/>",
                             "Treatment:", Treatment, "<br/>",
                             "Whole Mass", whole.mass))
+
+
+LitterMerge <-  LitterMerge %>% filter(!is.na(whole.mass))
 
 #Group Data Set
 GroupedLitterMerge <- LitterMerge %>%
   group_by(Year, Stand, Treatment, Plot, Basket, popup_info) %>%
   summarize(WholeMass = mean(whole.mass), Lat = mean(Lat), Long = mean(Long)) %>% 
-  filter(!is.na(Lat))
-  #ungroup()
+  filter(!is.na(Lat)) %>% 
+  filter(!is.na(WholeMass)) %>% 
+  ungroup()
 
 #Create Popup info
 GroupedLitterMerge <- GroupedLitterMerge%>% 
@@ -75,27 +77,10 @@ GroupedLitterMerge <- GroupedLitterMerge%>%
                             "Average Whole Mass", WholeMass))
 
 #Create Color Palletes
-colors <- c("green", "blue", "red")
-colors2 <- c("darkorange",
-             "darkorange1",
-             "darkorange2",
-             "darkorange3",
-             "darkorange4")
+colors <- c("white", "yellow", "orange", "red")
+colors2 <- c("Blues")
 
-pal <- colorFactor(colors, LitterMerge$Treatment)
-pal2 <- colorFactor(colors2, LitterMerge$mass.per.unit.area)
-
-
-# create awesome icons
-litter_icons <- iconList(
-  Phos = makeIcon("https://fontawesome.com/icons/square?style=solid"),
-  Carb = makeIcon("https://fontawesome.com/icons/circle?style=solid"),
-  Nitro = makeIcon("https://fontawesome.com/icons/star?style=solid"),
-  Both = makeIcon("https://fontawesome.com/icons/certificate?style=solid"))
-
-
-
-
+pal <- colorNumeric(colors2, GroupedLitterMerge$WholeMass)
 
 #Dashboard setup
 ui <- dashboardPage(
@@ -125,15 +110,18 @@ ui <- dashboardPage(
                                        selectize = TRUE, multiple = TRUE, selected = "C1"),
             ),
             #User input for treatment type             
-            box(width = 6, selectInput("MapTreatment", "Select Treatment:",
+            box(width = 3, selectInput("MapTreatment", "Select Treatment:",
                                        c("P", "N", "NP", "C", "Ca"),
                                        selectize = TRUE, multiple = TRUE, selected = "P"),
             ),
+            #Average of whole plot
+            box(width = 3, title = "Plot Average:",
+                checkboxInput('average', 'Average per Plot')),
             #User input for date range
-            box(width = 12, sliderInput("MapYear", "Year Range:",
+            box(width = 12, sliderInput("MapYear", "Year:",
                         min = 2011, 
                         max = 2020,
-                        value = c(2011, 2020), 
+                        value = 2015, 
                         sep = "")
             ),
             #Creates Box for world Map
@@ -155,38 +143,63 @@ server <- function(input, output) {
     StandSelect <- input$MapSite
     TreatmentSelect <- input$MapTreatment
     YearSelect <- input$MapYear
-    min <- input$MapYear[1]
-    max <- input$MapYear[2]
+    #min <- input$MapYear[1]
+    #max <- input$MapYear[2]
+    
+    LitterAverage <- GroupedLitterMerge %>% 
+      filter(Stand %in% StandSelect) %>% 
+      filter(Treatment %in% TreatmentSelect) %>%
+      filter(Year %in% YearSelect) %>% 
+      filter(!is.na(WholeMass)) %>%
+      mutate(popup_info = paste("Stand:", Stand, "<br/>",
+                                "Plot:", Plot, "<br/>",
+                                "Basket:", Basket, "<br/>",
+                                "Year:", Year, "<br/>",
+                                "Treatment:", Treatment, "<br/>",
+                                "Average Whole Mass", mean(WholeMass))) %>% 
+      group_by(Treatment)
+      
     
     GroupedLitterMerge <- GroupedLitterMerge %>%
       filter(Stand %in% StandSelect) %>% 
       filter(Treatment %in% TreatmentSelect) %>% 
-      filter(Year >= min & Year <= max)
+      #filter(Year >= min & Year <= max) %>% 
+      filter(Year %in% YearSelect) %>% 
+      filter(!is.na(WholeMass))
     
-    # create awesome icons
-    litter_icons <- iconList(
-      Phos = makeIcon("https://fontawesome.com/icons/square?style=solid"),
-      Carb = makeIcon("https://fontawesome.com/icons/circle?style=solid"),
-      Nitro = makeIcon("https://fontawesome.com/icons/star?style=solid"),
-      Both = makeIcon("https://fontawesome.com/icons/certificate?style=solid"))
-    
-    litter_icons2 <- icons(
-      iconUrl = if(GroupedLitterMerge$Treatment == "P"){"https://fontawesome.com/icons/square?style=solid"}
-      else if(GroupedLitterMerge$Treatment == "C"){"https://fontawesome.com/icons/circle?style=solid"}
-      else if(GroupedLitterMerge$Treatment == "N"){"https://fontawesome.com/icons/star?style=solid"}
-      else if(GroupedLitterMerge$Treatment == "NP"){"https://fontawesome.com/icons/certificate?style=solid"}
-      else {"https://fontawesome.com/icons/heart?style=solid"}
-      )
-    
+    if (input$average)
     leaflet()%>% 
-      addTiles()%>% 
+      addTiles()%>%
+      addCircleMarkers(data = LitterAverage,
+                       lat = ~mean(Lat), 
+                       lng = ~mean(Long),
+                       radius = 3,
+                       popup = ~popup_info,
+                       color = ~pal(WholeMass)
+                 ) %>% 
+      addLegend(position = "bottomright",
+                pal = pal,
+                values = LitterMerge$whole.mass,
+                bins = 6,
+                title = "Average Whole Mass per Year",
+                opacity = 1)
+    else
+      leaflet()%>% 
+      addTiles()%>%
       addCircleMarkers(data = GroupedLitterMerge,
                        lat = ~Lat, 
                        lng = ~Long,
-                       icon = ~litter_icons2,
                        radius = 3,
                        popup = ~popup_info,
-                       color = ~pal(Treatment))
+                       color = ~pal(WholeMass)
+      ) %>% 
+      addLegend(position = "bottomright",
+                pal = pal,
+                values = LitterMerge$whole.mass,
+                bins = 6,
+                title = "Average Whole Mass per Year",
+                opacity = 1)
+      
     })
 }
 
