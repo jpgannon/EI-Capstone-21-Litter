@@ -64,7 +64,8 @@ LitterMerge <-  LitterMerge %>% filter(!is.na(whole.mass))
 GroupedLitterMerge <- LitterMerge %>%
   group_by(litter.year, Stand, Treatment, Plot, Basket, popup_info) %>%
   summarize(WholeMass = mean(whole.mass), Lat = mean(Lat), Long = mean(Long)) %>% 
-  filter(!is.na(Lat))
+  filter(!is.na(Lat)) %>% 
+  ungroup()
 
 GroupedLitterMerge <- GroupedLitterMerge %>% 
   mutate(popup_info = paste("Stand:", Stand, "<br/>",
@@ -72,7 +73,8 @@ GroupedLitterMerge <- GroupedLitterMerge %>%
                             "Basket:", Basket, "<br/>",
                             "Year:", litter.year, "<br/>",
                             "Treatment:", Treatment, "<br/>",
-                            "Average Whole Mass", WholeMass))
+                            "Average Whole Mass", WholeMass)) %>% 
+  ungroup()
 
 #Filter soil resp data and converted to correct date format 
 CleanSoilResp <- SoilRespiration %>% 
@@ -95,7 +97,8 @@ Litterfall2 <- Litterfall %>%
 GroupedLitter_Species <- Litterfall2 %>%
   group_by(litter.year,Treatment,name) %>%
   filter(!is.na(value)) %>%
-  summarize(value = mean(value))
+  summarize(value = mean(value)) %>% 
+  ungroup()
 
 #Create color palet used for interactive map
 colors <- c("Oranges")
@@ -739,7 +742,7 @@ tabItem(tabName = "Map",
 #Litterfall Bivariate Tab
     tabItem(tabName = "Litterfall_BiVar", 
             h1("Litterfall Bivariate Plot"),
-            box(plotOutput('plot'), width = 12),
+            box(plotlyOutput('plot'), width = 12),
             hr(),
             column(6, h4("Litterfall Plot Explorer"),
                    sliderInput("Year", "Year Range:",
@@ -751,7 +754,7 @@ tabItem(tabName = "Map",
                    ),
                    br(),
                    checkboxInput('jitter', 'Jitter'),
-                   checkboxInput('smooth', 'Smooth'),
+                   checkboxInput('smooth', 'Smooth')
                    
             ),
             column(4, offset = 1,
@@ -762,7 +765,7 @@ tabItem(tabName = "Map",
     
 #Soil Respiration Bivariate Tab
     tabItem(tabName = "SoilRespiration_BiVar", 
-            h1("Soil Resperiration Bivariate Plot"),
+            h1("Soil Resperration Bivariate Plot"),
             box(plotlyOutput('plot1'), width = 12),
             hr(),
             column(2, h4("Soil Respiration Plot Explorer"),
