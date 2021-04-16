@@ -104,9 +104,9 @@ ui <- dashboardPage(
             #"HBCa""W5", "HB", "JB" not working
             box(width = 6, selectInput("MapSite", "Select Stand :",
                                        c( "C1", "C2", "C3", "C4", 
-                                         "C5", "C6", "C7", "C8",
-                                         "C9", "HBO", "HBM", "JBO", 
-                                         "JBM"),
+                                          "C5", "C6", "C7", "C8",
+                                          "C9", "HBO", "HBM", "JBO", 
+                                          "JBM"),
                                        selectize = TRUE, multiple = TRUE, selected = "C1"),
             ),
             #User input for treatment type             
@@ -119,10 +119,10 @@ ui <- dashboardPage(
                 checkboxInput('average', 'Average per Plot')),
             #User input for date range
             box(width = 12, sliderInput("MapYear", "Year:",
-                        min = 2011, 
-                        max = 2020,
-                        value = 2015, 
-                        sep = "")
+                                        min = 2011, 
+                                        max = 2020,
+                                        value = 2015, 
+                                        sep = "")
             ),
             #Creates Box for world Map
             fluidRow(box(width = 12, leafletOutput("StandMap")))),
@@ -132,12 +132,12 @@ ui <- dashboardPage(
     #Name and layout of soil respiration tab
     tabItem(tabName = "Soil_Respiration",
             h1("Soil Respiration"),
-            )
-    ))
-  )
+    )
+  ))
+)
 
 server <- function(input, output) {
-#Stand Selection Server Code
+  #Stand Selection Server Code
   output$StandMap <- renderLeaflet({
     
     StandSelect <- input$MapSite
@@ -151,14 +151,26 @@ server <- function(input, output) {
       filter(Treatment %in% TreatmentSelect) %>%
       filter(Year %in% YearSelect) %>% 
       filter(!is.na(WholeMass)) %>%
+      #filter(!is.na(Plot)) %>% 
       mutate(popup_info = paste("Stand:", Stand, "<br/>",
                                 "Plot:", Plot, "<br/>",
                                 "Basket:", Basket, "<br/>",
                                 "Year:", Year, "<br/>",
                                 "Treatment:", Treatment, "<br/>",
-                                "Average Whole Mass", mean(WholeMass))) %>% 
-      group_by(Treatment)
-      
+                                "Average Whole Mass", mean(WholeMass)))
+    
+    
+    LitterAverage <- LitterAverage %>% 
+      group_by(Treatment, Plot) %>% 
+      summarize(AvgWholeMass = mean(WholeMass),
+                AvgLat = mean(Lat),
+                AvgLong = mean(Long),
+                #AvgPlot = mean(Plot),
+                AvgYear = mean(Year)) %>% 
+      mutate(popup_info = paste("Plot:", Plot, "<br/>",
+                                "Year:", AvgYear, "<br/>",
+                                "Treatment:", Treatment, "<br/>",
+                                "Average Whole Mass", AvgWholeMass))
     
     GroupedLitterMerge <- GroupedLitterMerge %>%
       filter(Stand %in% StandSelect) %>% 
@@ -168,15 +180,15 @@ server <- function(input, output) {
       filter(!is.na(WholeMass))
     
     if (input$average)
-    leaflet()%>% 
+      leaflet()%>% 
       addTiles()%>%
       addCircleMarkers(data = LitterAverage,
-                       lat = ~mean(Lat), 
-                       lng = ~mean(Long),
+                       lat = ~AvgLat, 
+                       lng = ~AvgLong,
                        radius = 3,
                        popup = ~popup_info,
-                       color = ~pal(WholeMass)
-                 ) %>% 
+                       color = ~pal(AvgWholeMass)
+      ) %>% 
       addLegend(position = "bottomright",
                 pal = pal,
                 values = LitterMerge$whole.mass,
@@ -199,8 +211,8 @@ server <- function(input, output) {
                 bins = 6,
                 title = "Average Whole Mass per Year",
                 opacity = 1)
-      
-    })
+    
+  })
 }
 
 
