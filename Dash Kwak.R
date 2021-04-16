@@ -78,9 +78,9 @@ GroupedLitterMerge <- GroupedLitterMerge%>%
 
 #Create Color Palletes
 colors <- c("white", "yellow", "orange", "red")
-colors2 <- c("Blues")
+colors <- c("Blues")
 
-pal <- colorNumeric(colors2, GroupedLitterMerge$WholeMass)
+pal <- colorNumeric(colors, GroupedLitterMerge$WholeMass)
 
 #Dashboard setup
 ui <- dashboardPage(
@@ -143,15 +143,12 @@ server <- function(input, output) {
     StandSelect <- input$MapSite
     TreatmentSelect <- input$MapTreatment
     YearSelect <- input$MapYear
-    #min <- input$MapYear[1]
-    #max <- input$MapYear[2]
     
     LitterAverage <- GroupedLitterMerge %>% 
       filter(Stand %in% StandSelect) %>% 
       filter(Treatment %in% TreatmentSelect) %>%
       filter(Year %in% YearSelect) %>% 
       filter(!is.na(WholeMass)) %>%
-      #filter(!is.na(Plot)) %>% 
       mutate(popup_info = paste("Stand:", Stand, "<br/>",
                                 "Plot:", Plot, "<br/>",
                                 "Basket:", Basket, "<br/>",
@@ -159,13 +156,11 @@ server <- function(input, output) {
                                 "Treatment:", Treatment, "<br/>",
                                 "Average Whole Mass", mean(WholeMass)))
     
-    
     LitterAverage <- LitterAverage %>% 
       group_by(Treatment, Plot) %>% 
       summarize(AvgWholeMass = mean(WholeMass),
                 AvgLat = mean(Lat),
                 AvgLong = mean(Long),
-                #AvgPlot = mean(Plot),
                 AvgYear = mean(Year)) %>% 
       mutate(popup_info = paste("Plot:", Plot, "<br/>",
                                 "Year:", AvgYear, "<br/>",
@@ -175,7 +170,6 @@ server <- function(input, output) {
     GroupedLitterMerge <- GroupedLitterMerge %>%
       filter(Stand %in% StandSelect) %>% 
       filter(Treatment %in% TreatmentSelect) %>% 
-      #filter(Year >= min & Year <= max) %>% 
       filter(Year %in% YearSelect) %>% 
       filter(!is.na(WholeMass))
     
