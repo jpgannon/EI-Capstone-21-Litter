@@ -58,9 +58,11 @@ LitterMerge <- LitterMerge%>%
                             "Year:", Year, "<br/>",
                             "Treatment:", Treatment, "<br/>",
                             "Whole Mass", whole.mass))
+LitterMerge <-  LitterMerge %>% filter(!is.na(whole.mass))
 
+#Grouping Data
 GroupedLitterMerge <- LitterMerge %>%
-  group_by(Year, Stand, Treatment, Plot, Basket, popup_info) %>%
+  group_by(litter.year, Stand, Treatment, Plot, Basket, popup_info) %>%
   summarize(WholeMass = mean(whole.mass), Lat = mean(Lat), Long = mean(Long)) %>% 
   filter(!is.na(Lat))
 
@@ -68,7 +70,7 @@ GroupedLitterMerge <- GroupedLitterMerge %>%
   mutate(popup_info = paste("Stand:", Stand, "<br/>",
                             "Plot:", Plot, "<br/>",
                             "Basket:", Basket, "<br/>",
-                            "Year:", Year, "<br/>",
+                            "Year:", litter.year, "<br/>",
                             "Treatment:", Treatment, "<br/>",
                             "Average Whole Mass", WholeMass))
 
@@ -96,8 +98,8 @@ GroupedLitter_Species <- Litterfall2 %>%
   summarize(value = mean(value))
 
 #Create color palet used for interactive map
-colors <- c("green", "blue", "red")
-pal <- colorFactor(colors, LitterMerge$Treatment)
+colors <- c("Oranges")
+pal <- colorNumeric(colors, GroupedLitterMerge$WholeMass)
 
 #Grouping Data
 GroupedLitter_Specific <- LitterTable %>% 
@@ -182,7 +184,6 @@ ui <- dashboardPage(
                          tabName = "SoilRespiration_Data",
                          icon = icon("book")))
   )),
-  
   
   dashboardBody(tabItems(
     tabItem(tabName = "Home_Page",
@@ -278,31 +279,38 @@ ui <- dashboardPage(
                       
             )),
 #Interactive map tab with basic functions
-    tabItem(tabName = "Map",
-            h1("Interactive map of tree stands under study"),
-            #User input for stand type
-            #"HBCa""W5", "HB", "JB" not working
-            box(width = 6, selectInput("MapSite", "Select Stand :",
-                                       c( "C1", "C2", "C3", "C4", 
-                                          "C5", "C6", "C7", "C8",
-                                          "C9", "HBO", "HBM", "JBO", 
-                                          "JBM"),
-                                       selectize = TRUE, multiple = TRUE, selected = "C1"),
-            ),
-            #User input for treatment type             
-            box(width = 6, selectInput("MapTreatment", "Select Treatment:",
-                                       c("P", "N", "NP", "C", "Ca"),
-                                       selectize = TRUE, multiple = TRUE, selected = "P"),
-            ),
-            #User input for date range
-            box(width = 12, sliderInput("MapYear", "Year Range:",
-                                        min = 2011, 
-                                        max = 2020,
-                                        value = c(2011, 2020), 
-                                        sep = "")
-            ),
-            #Creates Box for world Map
-            fluidRow(box(width = 12, leafletOutput("StandMap")))),
+tabItem(tabName = "Home_Page",
+        h1("Home Page, desciption of app and
+               how to use will be placed here")),
+#Creates interactive map tab with basic functions
+tabItem(tabName = "Map",
+        h1("Interactive map of tree stands under study"),
+        #User input for stand type
+        #"HBCa" "W5", "HB", "JB" no data
+        box(width = 6, selectInput("MapSite", "Select Stand :",
+                                   c( "C1", "C2", "C3", "C4", 
+                                      "C5", "C6", "C7", "C8",
+                                      "C9", "HBO", "HBM", "JBO", 
+                                      "JBM"),
+                                   selectize = TRUE, multiple = TRUE, selected = "C1"),
+        ),
+        #User input for treatment type             
+        box(width = 3, selectInput("MapTreatment", "Select Treatment:",
+                                   c("P", "N", "NP", "C", "Ca"),
+                                   selectize = TRUE, multiple = TRUE, selected = "P"),
+        ),
+        #Average of whole plot
+        box(width = 3, title = "Plot Average:",
+            checkboxInput('average', 'Average per Plot')),
+        #User input for date range
+        box(width = 12, sliderInput("MapYear", "Year:",
+                                    min = 2011, 
+                                    max = 2020,
+                                    value = 2018, 
+                                    sep = "")
+        ),
+        #Creates Box for world Map
+        fluidRow(box(width = 12, leafletOutput("StandMap")))),
     
 #Litterfall Mass(All Stands)
     tabItem(tabName = "Litterfall_All",
@@ -785,23 +793,69 @@ server <- function(input, output) {
     StandSelect <- input$MapSite
     TreatmentSelect <- input$MapTreatment
     YearSelect <- input$MapYear
-    min <- input$MapYear[1]
-    max <- input$MapYear[2]
+    
+    LitterAverage <- GroupedLitterMerge %>% 
+      filter(Stand %in% StandSelect) %>% 
+      filter(Treatment %in% TreatmentSelect) %>%
+      filter(litter.year %in% YearSelect) %>% 
+      filter(!is.na(WholeMass)) %>%
+      mutate(popup_info = paste("Stand:", Stand, "<br/>",
+                                "Plot:", Plot, "<br/>",
+                                "Basket:", Basket, "<br/>",
+                                "Year:", litter.year, "<br/>",
+                                "Treatment:", Treatment, "<br/>",
+                                "Average Whole Mass", mean(WholeMass)))
+    
+    LitterAverage <- LitterAverage %>% 
+      group_by(Treatment, Plot) %>% 
+      summarize(AvgWholeMass = mean(WholeMass),
+                AvgLat = mean(Lat),
+                AvgLong = mean(Long),
+                AvgYear = mean(litter.year)) %>% 
+      mutate(popup_info = paste("Plot:", Plot, "<br/>",
+                                "Year:", AvgYear, "<br/>",
+                                "Treatment:", Treatment, "<br/>",
+                                "Average Whole Mass", AvgWholeMass))
     
     GroupedLitterMerge <- GroupedLitterMerge %>%
       filter(Stand %in% StandSelect) %>% 
       filter(Treatment %in% TreatmentSelect) %>% 
-      filter(Year >= min & Year <= max)
+      filter(litter.year %in% YearSelect) %>% 
+      filter(!is.na(WholeMass))
     
-    leaflet()%>% 
-      addTiles()%>% 
+    if (input$average)
+      leaflet()%>% 
+      addTiles()%>%
+      addCircleMarkers(data = LitterAverage,
+                       lat = ~AvgLat, 
+                       lng = ~AvgLong,
+                       radius = 3,
+                       popup = ~popup_info,
+                       color = ~pal(AvgWholeMass)
+      ) %>% 
+      addLegend(position = "bottomright",
+                pal = pal,
+                values = LitterMerge$whole.mass,
+                bins = 6,
+                title = "Average Whole Mass per Year",
+                opacity = 1)
+    else
+      leaflet()%>% 
+      addTiles()%>%
       addCircleMarkers(data = GroupedLitterMerge,
                        lat = ~Lat, 
                        lng = ~Long,
-                       #icon = ~litter_icons,
                        radius = 3,
                        popup = ~popup_info,
-                       color = ~pal(Treatment))
+                       color = ~pal(WholeMass)
+      ) %>% 
+      addLegend(position = "bottomright",
+                pal = pal,
+                values = LitterMerge$whole.mass,
+                bins = 6,
+                title = "Average Whole Mass per Year",
+                opacity = 1)
+    
   })
   
   
