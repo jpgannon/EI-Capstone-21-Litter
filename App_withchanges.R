@@ -793,7 +793,7 @@ ui <- dashboardPage(
                             
             )),
             fluidRow(column(12, h4("Soil Respiration Plot Explorer"),
-                            box(width = 12, sliderInput("date", "Select date range:",
+                            box(width = 12, sliderInput("Bivar_date", "Select date range:",
                                                         min = min(dataset1$date), 
                                                         max = max(dataset1$date),
                                                         value = c(min(dataset1$date), max(dataset1$date)),
@@ -1446,14 +1446,14 @@ server <- function(input, output) {
   })
   
   #Litterfall Bivariate ggplot code
-  dataset <- reactive({
-    dataset <- as.data.frame(Litterfall[sample(nrow(Litterfall), input$Bivar_Ldate),])
-  })
-  
   output$plot <- renderPlotly({
+    minYear <- input$Bivar_Ldate[1]
+    maxYear <- input$Bivar_Ldate[2]
     
-    
-    p <- ggplot(dataset(), aes_string(x=input$x, y=input$y)) + geom_point()
+    p <- dataset %>%
+      filter(litter.year >= minYear & litter.year <= maxYear) %>%
+      ggplot(aes_string(x = input$x, y = input$y)) + 
+      geom_point()
     
     if (input$color != 'None')
       p <- p + aes_string(color=input$color)
@@ -1466,12 +1466,14 @@ server <- function(input, output) {
   })
   
   #Soil Respiration Bivariate ggplot code
-  dataset1 <- reactive({
-    CleanSoilResp[sample(nrow(CleanSoilResp), ),]
-  })
   output$plot1 <- renderPlotly({
+    FirstDate <- input$Bivar_date[1]
+    LastDate <- input$Bivar_date[2]
     
-    p1 <- ggplot(dataset1(), aes_string(x=input$x1, y=input$y1)) + geom_point()
+    p1 <- dataset1 %>%
+      filter(date >= FirstDate & date <= LastDate) %>%
+      ggplot(aes_string(x = input$x1, y = input$y1)) + 
+      geom_point()
     
     if (input$color1 != 'None')
       p1 <- p1 + aes_string(color=input$color1)
