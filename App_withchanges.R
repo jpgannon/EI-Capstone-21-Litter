@@ -60,7 +60,7 @@ GroupedLitterMerge <- GroupedLitterMerge %>%
                             "Basket:", Basket, "<br/>",
                             "Year:", litter.year, "<br/>",
                             "Treatment:", Treatment, "<br/>",
-                            "Average Whole Mass", whole.mass))
+                            "Average Litterfall Mass", whole.mass))
 
 #Filter soil resp data and converted to correct date format 
 CleanSoilResp <- SoilRespiration %>% 
