@@ -42,9 +42,6 @@ Lat_Long_Lit <- as.data.frame(Lat_Long_Lit)
 lat_long <- lat_long %>%
   rename(Stand = Site, Basket = Stake)
 
-#Litterfall_Lat_Long <- Litterfall_Lat_Long %>% 
-#  rename(Stand = stand, Plot = plot, Basket = basket)
-
 #Merge Litterset to include Lat and Long, also adding pop up info to litter merge
 LitterMerge <-merge(Litterfall, lat_long, by = c('Stand', 'Plot', 'Basket'), all = TRUE)
 
@@ -945,6 +942,10 @@ server <- function(input, output) {
       geom_dotplot(aes(x = date, y = flux, fill = treatment), position = position_dodge(0.8), 
                    binaxis = "y")+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0))+
       labs(title = "Time Series: CO2 Flux vs. Time", 
            x = "Date", 
@@ -968,6 +969,8 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 60, hjust = 1))+
       theme_bw()+
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       labs(title = "Boxplot: CO2 Flux vs. Treatment Type", 
            x = "Treatment", 
            y = "CO2 efflux per unit area (μg CO2/m2/s)")+
@@ -994,6 +997,10 @@ server <- function(input, output) {
       geom_dotplot(aes(x = litter.year, y = whole.mass, fill = Treatment), position = position_dodge(0.8), 
                    binaxis = "y")+
       theme_bw() +
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
       labs(title ="Time Series: Litterfall Mass vs. Time",
            x = "Litter Year",
@@ -1016,6 +1023,10 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
       theme_bw() +
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       labs(title ="Boxplot: Litterfall Mass vs. Treatment Type",
            x = "Treatment",
            y = "Mass (g litter /m2)") 
@@ -1038,6 +1049,10 @@ server <- function(input, output) {
       geom_dotplot(aes(x = litter.year, y = whole.mass, fill = Treatment), position = position_dodge(0.8), 
                    binaxis = "y")+
       theme_bw() +
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
       labs(title ="Time Series: Litterfall Mass vs. Time",
            x = "Litter Year",
@@ -1061,6 +1076,10 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
       theme_bw() +
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       labs(title ="Boxplot: Litterfall Mass vs. Treatment Type",
            x = "Treatment",
            y = "Mass (g litter /m2)") +
@@ -1082,6 +1101,10 @@ server <- function(input, output) {
       geom_point(aes(x = litter.year, y = value, group = Treatment, color = Treatment)) + 
       geom_line(aes(x = litter.year, y = value, color = Treatment, group = Treatment)) + 
       theme_bw() +
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
       labs(title ="Grouped Time Series: Litterfall Mass vs. Time",
            x = "Litter Year",
@@ -1108,6 +1131,8 @@ server <- function(input, output) {
       geom_point(aes(x = litter.year, y = Mass, group = Treatment, color = Treatment)) + 
       geom_line(aes(x = litter.year, y = Mass, color = Treatment, group = Treatment)) + 
       theme_bw() +
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
       labs(title ="Average Litterfall Mass vs. Time",
            x = "Litter Year",
@@ -1131,6 +1156,10 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
       theme_bw() +
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       labs(title ="Boxplot: Average Litterfall Mass vs. Treatment Type",
            x = "Treatment",
            y = "Mass (g litter /m2)")
@@ -1150,6 +1179,10 @@ server <- function(input, output) {
       geom_point(aes(x = litter.year, y = Mass, group = Treatment, color = Treatment)) + 
       geom_line(aes(x = litter.year, y = Mass, color = Treatment, group = Treatment)) + 
       theme_bw() +
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
       labs(title ="Grouped Time Series: Litterfall Mass vs. Time",
            x = "Litter Year",
@@ -1174,6 +1207,10 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
       theme_bw() +
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       labs(title ="Boxplot: Average Litterfall Mass vs. Treatment Type",
            x = "Treatment",
            y = "Mass (g litter /m2)")+
@@ -1202,6 +1239,10 @@ server <- function(input, output) {
       geom_dotplot(aes(x = date, y = temperature, fill = treatment), position = position_dodge(0.8), 
                    binaxis = "y")+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0))+
       labs(title = "Time Series: Temperature vs Time", 
            x = "Date", 
@@ -1224,6 +1265,10 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 60, hjust = 1))+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       labs(title = "Boxplot: Temperature vs. Treatment Type", 
            x = "Treatment", 
            y = "Temperature (°C)")
@@ -1245,6 +1290,10 @@ server <- function(input, output) {
       geom_dotplot(aes(x = date, y = temperature, fill = treatment), position = position_dodge(0.8), 
                    binaxis = "y")+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0))+
       labs(title = "Time Series: Temperature vs. Time", 
            x = "Date", 
@@ -1268,6 +1317,10 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 60, hjust = 1))+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       labs(title = "Time Series: Temperature vs Treatment Type", 
            x = "Treatment", 
            y = "Temperature (°C)")+
@@ -1289,6 +1342,10 @@ server <- function(input, output) {
       geom_point(aes(x = date, y = flux, group = treatment, color = treatment))+
       geom_path(aes(x = date, y = flux, group = treatment, color = treatment))+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0))+
       labs(title = "Time Series: Average CO2 Flux vs. Time", 
            x = "Date", 
@@ -1311,6 +1368,10 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 60, hjust = 1))+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       labs(title = "Boxplot: Average CO2 Flux vs Treatment Type", 
            x = "Treatment", 
            y = "Average CO2 efflux per unit area (μg CO2/m2/s)")
@@ -1330,6 +1391,10 @@ server <- function(input, output) {
       geom_point(aes(x = date, y = flux, group = treatment, color = treatment))+
       geom_path(aes(x = date, y = flux, group = treatment, color = treatment))+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0))+
       labs(title = "Time Series: Average CO2 Flux vs. Time", 
            x = "Date", 
@@ -1354,6 +1419,10 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 60, hjust = 1))+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       labs(title = "Boxplot: Average CO2 Flux vs. Treatment Type", 
            x = "Treatment", 
            y = "Average CO2 efflux per unit area (μg CO2/m2/s)")+
@@ -1375,6 +1444,10 @@ server <- function(input, output) {
       geom_point(aes(x = date, y = temperature, group = treatment, color = treatment))+
       geom_line(aes(x = date, y = temperature, group = treatment, color = treatment))+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0))+
       labs(title = "Time Series: Average Temperature vs. Time", 
            x = "Date", 
@@ -1396,6 +1469,10 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 90, hjust = 0))+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       labs(title = "Boxplot: Average Temperature vs Treatment Type", 
            x = "Treatment", 
            y = "Average Temperature (°C)")
@@ -1415,6 +1492,10 @@ server <- function(input, output) {
       geom_point(aes(x = date, y = temperature, group = treatment, color = treatment))+
       geom_line(aes(x = date, y = temperature, group = treatment, color = treatment))+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0))+
       labs(title = "Time Series: Average Temperature vs Time", 
            x = "Date", 
@@ -1439,6 +1520,10 @@ server <- function(input, output) {
       geom_line()+
       theme(axis.text.x = element_text(angle = 90, hjust = 0))+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                        values = c("red", "blue", "purple", "green", "yellow")) +
       labs(title = "Boxplot: Average Temperature vs Treatment Type", 
            x = "Treatment", 
            y = "Average Temperature (°C)")+
