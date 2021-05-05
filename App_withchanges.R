@@ -37,10 +37,6 @@ LitterUTM <- select(LitterBasket_Coord, stand, plot, basket, stake1_utm_x, stake
 utm <- SpatialPoints(LitterUTM[c("stake1_utm_x", "stake1_utm_y")], proj4string=CRS("+proj=utm +zone=19T +datum=WGS84"))
 Lat_Long_Lit <- spTransform(utm, CRS("+proj=longlat +datum=WGS84"))
 Lat_Long_Lit <- as.data.frame(Lat_Long_Lit)
-#write_csv(Lat_Long_Lit, "Lat_Long_Lit")
-#Litterfall_Lat_Long <- LitterUTM %>% 
-#  mutate(Lat = Lat_Long_Lit$stake1_utm_y) %>% 
-#  mutate(Long = Lat_Long_Lit$stake1_utm_x)
 
 #renaming data to merge tables
 lat_long <- lat_long %>%
@@ -124,7 +120,6 @@ dataset1 <- CleanSoilResp %>%
   select(date, stand, flux, temperature, treatment) %>%
   mutate(date(ymd(date)))
 
-
 #Dashboard setup
 ui <- dashboardPage(
   skin = "black",
@@ -180,11 +175,11 @@ ui <- dashboardPage(
              menuSubItem("Soil Respiration Bivariate",
                          tabName = "SoilRespiration_BiVar",
                          icon = icon("bar-chart-o"))),
-    menuItem("Explore Data", icon = icon("table"), startExpanded = TRUE,
-             menuSubItem("Visualize Litterfall Data",
+    menuItem("Tabular Data", icon = icon("table"), startExpanded = TRUE,
+             menuSubItem("Litterfall Data",
                          tabName = "Litterfall_Data",
                          icon = icon("book")),
-             menuSubItem("Visualize Soil Respiration Data",
+             menuSubItem("Soil Respiration Data",
                          tabName = "SoilRespiration_Data",
                          icon = icon("book")))
   )),
@@ -278,7 +273,7 @@ ui <- dashboardPage(
                                                  The user can select variables of interest (for their desired dataset) and visualize the relationship in a scatter plot. The user is also able to color data points based on other parameters of interest.", style = "font-size:20px")
                              
                       ),
-                      column(width = 10, helpText(strong("Explore Data Tab:"), "These sub tabs included in this section allow the user to explore either the litterfall dataset or the soil respiration dataset.
+                      column(width = 10, helpText(strong("Tabular Data:"), "These sub tabs included in this section allow the user to explore either the litterfall dataset or the soil respiration dataset.
                                                   Variables can be filtered to view specific raw data.", style = "font-size:20px"))
                       
             )),
@@ -842,7 +837,8 @@ server <- function(input, output) {
       summarize(AvgWholeMass = mean(whole.mass),
                 AvgLat = mean(Lat),
                 AvgLong = mean(Long)) %>% 
-      mutate(popup_info = paste("Plot:", Plot, "<br/>",
+      mutate(popup_info = paste("Stand:", Stand, "<br/>",
+                                "Plot:", Plot, "<br/>",
                                 "Year:", litter.year, "<br/>",
                                 "Treatment:", Treatment, "<br/>",
                                 "Average Whole Mass", AvgWholeMass))
@@ -895,10 +891,14 @@ server <- function(input, output) {
       filter(stand %in% standselection & treatment %in% treatmentselection)%>%
       mutate(date = as.factor(date))%>%
       ggplot(aes(x = date, y = flux))+
-      geom_boxplot(aes(x = date, y = flux, color = treatment), position = position_dodge(0.8))+
-      geom_dotplot(aes(x = date, y = flux, fill = treatment), position = position_dodge(0.8), 
+      geom_boxplot(aes(color = treatment), position = position_dodge(0.8))+
+      geom_dotplot(aes(fill = treatment), position = position_dodge(0.8), 
                    binaxis = "y")+
       theme_bw()+
+      scale_color_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0))+
       labs(title = "Time Series: CO2 Flux vs. Time", 
            x = "Date", 
@@ -921,6 +921,8 @@ server <- function(input, output) {
                    outlier.size = 4, lwd = 0.8)+
       geom_line()+
       theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+      scale_fill_manual(breaks = c("P", "N", "NP", "C", "Ca"),
+                         values = c("red", "blue", "purple", "green", "yellow")) +
       theme_bw()+
       labs(title = "Boxplot: CO2 Flux vs. Treatment Type", 
            x = "Treatment", 
